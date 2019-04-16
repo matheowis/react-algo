@@ -30,8 +30,6 @@ class AlgoContainer extends Component {
     this.mainHolder["B3"].Include("rgb(255,0,0)");
   }
   render() {
-    console.log(this.props);
-    console.log(this.mainHolderKeys)
     return (
       <div>
         {this.mainHolderKeys.map((row,i) => (
@@ -40,6 +38,7 @@ class AlgoContainer extends Component {
               <AlgoBar
                 key={column.name}
                 item={column}
+                tabs={this.mainHolder}
               />
             ))}
           </div>
