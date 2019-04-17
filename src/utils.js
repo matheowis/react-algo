@@ -78,7 +78,7 @@ export function getStringsBetween(string, prevArr, endArr) {
   }
   return between
 }
-
+// TODO
 function algorithmVariables(rawAlgorithm, container) {
   if (rawAlgorithm[0] !== "=" && !isNaN(rawAlgorithm)) {
     return rawAlgorithm;
@@ -117,20 +117,25 @@ function algorithmVariables(rawAlgorithm, container) {
   }
   console.log(parts);
   return variables;
-  function between(value, starts, ends, include) {
-    for (var s = 0; s < starts.length; s++) {
-      if (include) {
-        if (value >= starts[s] && value <= ends[s]) {
-          return true;
-        }
-      } else {
-        if (value > starts[s] && value < ends[s]) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+  // might be better to work on parts!
 }
 
 export const OPERATORS = ['=', ';', '/', '*', '-', '+'];
+
+export const isOperator = (char) => between(char.charCodeAt(0), [48, 65], [57, 90], true);
+
+//Private functions
+function between(value, starts, ends, include) {
+  for (var s = 0; s < starts.length; s++) {
+    if (include) {
+      if (value >= starts[s] && value <= ends[s]) {
+        return true;
+      }
+    } else {
+      if (value > starts[s] && value < ends[s]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
