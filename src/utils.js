@@ -27,11 +27,11 @@ export function lettersToNum(letters) {
   const upper = letters.toUpperCase();
   let power = letters.length - 1;
   let num = 0;
-  while(power >= 0){
+  while (power >= 0) {
     const index = upper.length - 1 - power;
     const val = upper.charCodeAt(index) - 64
     console.log(val)
-    num += val * Math.pow(26,power);
+    num += val * Math.pow(26, power);
     power--;
   }
   num--;
@@ -78,3 +78,59 @@ export function getStringsBetween(string, prevArr, endArr) {
   }
   return between
 }
+
+function algorithmVariables(rawAlgorithm, container) {
+  if (rawAlgorithm[0] !== "=" && !isNaN(rawAlgorithm)) {
+    return rawAlgorithm;
+  }
+  const algorithm = rawAlgorithm.slice(1);
+  if (algorithm === "") {
+    return "0";
+  }
+  const variables = {}; //split and join
+  const parts = [];
+  let stringHolder = "";
+  let stringPart = "";
+  for (var i = 0; i < algorithm.length; i++) {
+    if (between(algorithm.charCodeAt(i), [48, 65], [57, 90], true) && i !== algorithm.length - 1) {// stringHolder !== "" &&
+      if(stringHolder === "" && stringPart !== ""){
+        parts.push(stringPart);
+        stringPart = "";
+      }
+      stringHolder += algorithm[i]
+    } else {
+      if (i === algorithm.length - 1) {
+        stringHolder += algorithm[i]
+      }else{
+        stringPart += algorithm[i]
+      }
+      if (isNaN(stringHolder) && container[stringHolder]) {
+        if (variables[stringHolder]) {
+          variables[stringHolder]++
+        } else {
+          variables[stringHolder] = 1;
+        }
+      }
+      parts.push(stringHolder);
+      stringHolder = "";
+    }
+  }
+  console.log(parts);
+  return variables;
+  function between(value, starts, ends, include) {
+    for (var s = 0; s < starts.length; s++) {
+      if (include) {
+        if (value >= starts[s] && value <= ends[s]) {
+          return true;
+        }
+      } else {
+        if (value > starts[s] && value < ends[s]) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}
+
+export const OPERATORS = ['=', ';', '/', '*', '-', '+'];

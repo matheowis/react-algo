@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
-import MultiColorInput from './MultiColorInput'
+
 const styles = {
   bar: {
     width: 100,
@@ -85,7 +85,7 @@ class AlgoCell extends Component {
           onFocus={this.props.onFocus(item)}
           onChange={this.props.onChange(item)}
           onKeyDown={this.props.onKeyDown(item)}
-          onClick={e => {e.preventDefault(); console.log("test")}}
+          onMouseDown={this.props.onMouseDown(item)}
           value={value}
           style={{ borderColor: this.state.color }}
           ref={this.myRef}
@@ -103,6 +103,7 @@ AlgoCell.propTypes = {
   onFocus: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onKeyDown: PropTypes.func.isRequired,
+  onMouseDown: PropTypes.func.isRequired,
   lock: PropTypes.bool.isRequired
 }
 
