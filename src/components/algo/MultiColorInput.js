@@ -9,6 +9,7 @@ class MultiColorInput extends Component {
     console.dir(e.target)
     console.log(e.target.selectionStart)
     console.log(window.getSelection().getRangeAt(0));
+    console.log(window.getSelection());
   }
 
   render() {

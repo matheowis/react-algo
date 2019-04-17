@@ -8,9 +8,8 @@ const styles = {
  class Main extends Component{
    render(){
      return (
-       <div>
-         <AlgoContainer />
-
+       <div style={{width:"100%", height:"100vh"}}>
+         <AlgoContainer rows={40} columns={20}/>
        </div>
      )
    }

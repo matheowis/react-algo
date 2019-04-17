@@ -23,6 +23,21 @@ export function numToLetters(num) {
   return String.fromCharCode(...positions);
 }
 
+export function lettersToNum(letters) {
+  const upper = letters.toUpperCase();
+  let power = letters.length - 1;
+  let num = 0;
+  while(power >= 0){
+    const index = upper.length - 1 - power;
+    const val = upper.charCodeAt(index) - 64
+    console.log(val)
+    num += val * Math.pow(26,power);
+    power--;
+  }
+  num--;
+  return num;
+}
+
 export function getStringsBetween(string, prevArr, endArr) {
   let match = "";
   let prevMaches = new Array(prevArr.length).fill("");
