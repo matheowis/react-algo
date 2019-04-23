@@ -16,11 +16,11 @@ const styles = {
 
 class RightTools extends Component {
   render() {
-    const { classes, open, children } = this.props;
+    const { classes, open, children,top,left } = this.props;
     const length = children.length || 1;
     const height = open ? length * 48 : 0;
     return (
-      <div className={classes.root} style={{ height }}>
+      <div className={classes.root} style={{ height,top,left }}>
         {children}
       </div>
     )
@@ -28,7 +28,9 @@ class RightTools extends Component {
 }
 
 RightTools.propTypes = {
-  open: PropTypes.bool.isRequired
+  open: PropTypes.bool.isRequired,
+  top:PropTypes.number.isRequired,
+  left:PropTypes.number.isRequired
 }
 
 export default injectSheet(styles)(RightTools)
