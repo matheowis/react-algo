@@ -1,33 +1,42 @@
 export const connectedCells = (cellNameA, cellNameB) => {
-  let NameXa = "";
-  let NameYa = "";
-  for (var i = 0; i < cellNameA.length; i++) {
-    if (isNaN(cellNameA[i])) {
-      NameXa += cellNameA[i]
-    } else {
-      NameYa += cellNameA[i]
-    }
-  }
-  let NameXb = "";
-  let NameYb = "";
-  for (var i = 0; i < cellNameB.length; i++) {
-    if (isNaN(cellNameB[i])) {
-      NameXb += cellNameB[i];
-    } else {
-      NameYb += cellNameB[i];
-    }
-  }
-  if (NameXa === NameXb) {
-    const start = parseFloat(NameYa);
-    const length = Math.abs(parseFloat(NameYb) - start + 1);
-    return new Array(length).fill(0).map((_, i) => `${NameXa}${i + start}`);
-  } else if (NameYa === NameYb) {
-    const start = lettersToNum(NameXa);
-    const length = Math.abs(lettersToNum(NameXb) - start + 1);
-    return new Array(length).fill(0).map((_, i) => `${numToLetters(i + start)}${NameYa}`);
+  const a = splitCellName(cellNameA);
+  const b = splitCellName(cellNameB);
+  if (a.x === b.x) {
+    const length = Math.abs(b.y - a.y + 1);
+    return new Array(length).fill(0).map((_, i) => `${numToLetters(a.x)}${i + a.y}`);
+  } else if (a.y === b.y) {
+    const length = Math.abs(lettersToNum(b.x) - a.x + 1);
+    return new Array(length).fill(0).map((_, i) => `${numToLetters(i + a.x)}${a.y}`);
   } else {
     return [];
   }
+}
+// export const connectedCells = (cellNameA, cellNameB) => {
+//   const a = splitCellName(cellNameA);
+//   const b = splitCellName(cellNameB);
+//   if (a.x === b.x) {
+//     const start = parseFloat(a.y);
+//     const length = Math.abs(parseFloat(b.y) - start + 1);
+//     return new Array(length).fill(0).map((_, i) => `${a.x}${i + start}`);
+//   } else if (a.y === b.y) {
+//     const start = lettersToNum(a.x);
+//     const length = Math.abs(lettersToNum(b.x) - start + 1);
+//     return new Array(length).fill(0).map((_, i) => `${numToLetters(i + start)}${a.y}`);
+//   } else {
+//     return [];
+//   }
+// }
+
+export const getCellsFromBox = (cellNameA, cellNameB) => {
+  const a = splitCellName(cellNameA);
+  const b = splitCellName(cellNameB);
+  const cells = [];
+  for (var x = Math.min(a.x, b.x); x < Math.max(a.x, b.x) + 1; x++) {
+    for (var y = Math.min(a.y, b.y); y < Math.max(a.y, b.y) + 1; y++) {
+      cells.push(`${numToLetters(x)}${y}`);
+    }
+  }
+  return cells;
 }
 
 export function isBetween(value, starts, ends, include) {
@@ -82,4 +91,31 @@ export function lettersToNum(letters) {
   }
   num--;
   return num;
+}
+
+function splitCellName(name) {
+  let x = "";
+  let y = "";
+  for (var i = 0; i < name.length; i++) {
+    if (isNaN(name[i])) {
+      x += name[i];
+    } else {
+      y += name[i];
+    }
+  }
+  x = lettersToNum(x);
+  y = parseFloat(y);
+  return { x, y };
+}
+function splitCellName2(name) {
+  let x = "";
+  let y = "";
+  for (var i = 0; i < name.length; i++) {
+    if (isNaN(name[i])) {
+      x += name[i];
+    } else {
+      y += name[i];
+    }
+  }
+  return { x, y };
 }

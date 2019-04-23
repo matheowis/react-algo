@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
-import { numToLetters,OPERATORS } from "../../utils";
+import { numToLetters, OPERATORS } from "../../utils";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
-import {AlgoFunctions} from "../../functions/AlgoFunctions";
+import { AlgoFunctions } from "../../functions/AlgoFunctions";
 const styles = {
   side: {
     minWidth: 24, maxWidth: 24,
@@ -43,8 +43,8 @@ class AlgoContainer extends Component {
     functionCells: {}
   };
   mainHolderKeys = [];
-  algoFunctions= new AlgoFunctions(this.gVariables);
-  Algo = {writing:false, currentItem:{}, selectedCell:null}
+  algoFunctions = new AlgoFunctions(this.gVariables);
+  Algo = { writing: false, currentItem: {}, selectedCell: null }
   componentWillMount() {
     const { rows, columns } = this.props;
     for (var x = 0; x < rows; x++) {
@@ -67,10 +67,10 @@ class AlgoContainer extends Component {
     this.gVariables.holder.active.item = null;
 
     if (algorithm[0] === "=") {
-      //calculate
+      // calculate
       // const outcome = eval(algorithm.slice(1));
       const outcome = this.algoFunctions.CalculateLocal(item);
-      
+
       item.props.outcome = outcome;
       item.props.handleChange(outcome);
     }
@@ -78,31 +78,40 @@ class AlgoContainer extends Component {
 
   handleFocus = item => event => {
     this.Algo.currentItem = item;
+    const { algorithm, outcome } = item.props;
+    console.log("item.props", item.props);
+
+    if (outcome[0] !== "=" && algorithm[0] === "=") {
+      console.log("switch!")
+      item.props.handleChange(algorithm);
+    }
     // console.log("item", item)
-    const { algorithm } = item.props;
     this.gVariables.holder.active.setName(item.name);
     this.gVariables.holder.active.setAlgorithm(algorithm);
     this.gVariables.holder.active.item = item;
   }
 
   handleKeyDown = item => event => {
-    const { x, y } = item.props;
+    const { x, y, algorithm } = item.props;
     const blureItem = (nx, ny) => {
       const newName = `${numToLetters(y - nx)}${x + 1 - ny}`;
       this.gVariables.holder[newName].ref.current.focus();
     }
+    const algoItems = algorithm[0] === "=" ? this.algoFunctions.splitAlgorithm(algorithm) : [1];
+    const canMove = !isNaN(algoItems[algoItems.length - 1]);
+    console.log({canMove});
     switch (event.key) {
       case "ArrowDown":
-        // blureItem(0, -1);
+        canMove && blureItem(0, -1);
         break;
       case "ArrowUp":
-        // blureItem(0, 1);
+        canMove && blureItem(0, 1);
         break;
       case "ArrowLeft":
-        // blureItem(1, 0);
+        canMove && blureItem(1, 0);
         break;
       case "ArrowRight":
-        // blureItem(-1, 0);
+        canMove && blureItem(-1, 0);
         break;
       case "Enter":
         item.props.ref.current.blur();
@@ -114,20 +123,20 @@ class AlgoContainer extends Component {
   }
 
   handleMouseDown = item => event => {
-    if(this.Algo.currentItem.props){
-      const {algorithm} = this.Algo.currentItem.props;
-      const {props} = this.Algo.currentItem
-      if(this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name){
+    if (this.Algo.currentItem.props) {
+      const { algorithm } = this.Algo.currentItem.props;
+      const { props } = this.Algo.currentItem
+      if (this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name) {
         event.preventDefault();
         const selection = this.Algo.currentItem.props.ref.current.selectionStart;
         // console.log("algorithm[selection-1]",algorithm[selection-1])
 
-        if(this.Algo.selectedCell){
+        if (this.Algo.selectedCell) {
           props.algorithm = algorithm.replace(this.Algo.selectedCell, item.name);
           this.Algo.currentItem.props.handleChange(props.algorithm);
-        }else if(OPERATORS.includes(algorithm[selection-1])){
+        } else if (OPERATORS.includes(algorithm[selection - 1])) {
           this.Algo.selectedCell = item.name;
-          props.algorithm = algorithm.slice(0,selection) + item.name + algorithm.slice(selection,algorithm.length)
+          props.algorithm = algorithm.slice(0, selection) + item.name + algorithm.slice(selection, algorithm.length)
           // console.log("props.algorithm",props.algorithm);
           this.Algo.currentItem.props.handleChange(props.algorithm);
         }
@@ -135,16 +144,17 @@ class AlgoContainer extends Component {
       }
     }
 
-    
-    
+
+
     //event.preventDefault();
   }
 
   handleChange = item => event => {
     const selection = event.target.selectionStart;
     const value = event.target.value;
+
     // console.log("OPERATORS",OPERATORS);
-    if(OPERATORS.includes(value[selection-1])){
+    if (OPERATORS.includes(value[selection - 1])) {
       this.Algo.selectedCell = null;
     }
     this.Algo.writing = value[0] === "=";
