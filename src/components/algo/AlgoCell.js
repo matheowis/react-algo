@@ -104,11 +104,6 @@ AlgoCell.propTypes = {
   onChange: PropTypes.func.isRequired,
   onKeyDown: PropTypes.func.isRequired,
   onMouseDown: PropTypes.func.isRequired,
-  lock: PropTypes.bool.isRequired
 }
 
 export default injectSheet(styles)(AlgoCell);
-
-{/* <code contenteditable="true">
-  <span style="color: blue">var</span> foo = <span style="color: green">"bar"</span>;
-</code> */}

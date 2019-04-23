@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { numToLetters,OPERATORS } from "../../utils";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
-
+import {AlgoFunctions} from "../../functions/AlgoFunctions";
 const styles = {
   side: {
     minWidth: 24, maxWidth: 24,
@@ -36,8 +36,13 @@ const styles = {
 // }
 
 class AlgoContainer extends Component {
-  mainHolder = {};
+  // mainHolder = {};
+  gVariables = {
+    holder: {},
+    definedCells: {},
+  };
   mainHolderKeys = [];
+  algoFunctions= new AlgoFunctions(this.gVariables);
   Algo = {writing:false, currentItem:{}, selectedCell:null}
   componentWillMount() {
     const { rows, columns } = this.props;
@@ -46,23 +51,19 @@ class AlgoContainer extends Component {
       for (var y = 0; y < columns; y++) {
         const name = `${numToLetters(y)}${x + 1}`;
         const obj = { algorithm: "", outcome: "", isOver: false, name, x, y };
-        this.mainHolder[name] = obj;
+        this.gVariables.holder[name] = obj;
         this.mainHolderKeys[x].push({ name, props: obj });
       }
     }
-    this.mainHolder.active = { name: "", algorithm: "", outcome: "" }
-  }
-  componentDidMount() {
-    // TEST
-    // this.mainHolder["B3"].Include("rgb(255,0,0)");
+    this.gVariables.holder.active = { name: "", algorithm: "", outcome: "" }
   }
 
   handleBlur = item => event => {
     const { algorithm } = item.props;
     this.Algo.writing = false;
-    this.mainHolder.active.setName("");
-    this.mainHolder.active.setAlgorithm("");
-    this.mainHolder.active.item = null;
+    this.gVariables.holder.active.setName("");
+    this.gVariables.holder.active.setAlgorithm("");
+    this.gVariables.holder.active.item = null;
 
     if (algorithm[0] === "=") {
       //calculate
@@ -76,16 +77,16 @@ class AlgoContainer extends Component {
     this.Algo.currentItem = item;
     console.log("item", item)
     const { algorithm } = item.props;
-    this.mainHolder.active.setName(item.name);
-    this.mainHolder.active.setAlgorithm(algorithm);
-    this.mainHolder.active.item = item;
+    this.gVariables.holder.active.setName(item.name);
+    this.gVariables.holder.active.setAlgorithm(algorithm);
+    this.gVariables.holder.active.item = item;
   }
 
   handleKeyDown = item => event => {
     const { x, y } = item.props;
     const blureItem = (nx, ny) => {
       const newName = `${numToLetters(y - nx)}${x + 1 - ny}`;
-      this.mainHolder[newName].ref.current.focus();
+      this.gVariables.holder[newName].ref.current.focus();
     }
     switch (event.key) {
       case "ArrowDown":
@@ -147,7 +148,7 @@ class AlgoContainer extends Component {
 
     item.props.algorithm = value;
     item.props.handleChange(value);
-    this.mainHolder.active.setAlgorithm(item.props.algorithm);
+    this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
     // if (value[0] === "=") {
     //   item.props.algorithm = value.slice(1);
     //   this.setState(() => ({ value }))
@@ -164,7 +165,7 @@ class AlgoContainer extends Component {
     const { classes } = this.props;
     return (
       <div style={{ width: "100%", height: "80%" }}>
-        <AlgoHeader active={this.mainHolder.active} />
+        <AlgoHeader active={this.gVariables.holder.active} />
         <div style={{ width: "100%", height: "100%", overflow: "auto", position: "relative" }}>
           <div style={{ display: "flex", position: "sticky", top: 0, zIndex: 3 }}>
             <div className={classes.side} />
@@ -179,13 +180,11 @@ class AlgoContainer extends Component {
                 <AlgoCell
                   key={column.name}
                   item={column}
-                  tabs={this.mainHolder}
                   onBlur={this.handleBlur}
                   onFocus={this.handleFocus}
                   onChange={this.handleChange}
                   onKeyDown={this.handleKeyDown}
                   onMouseDown={this.handleMouseDown}
-                  lock={this.lock}
                 />
               ))}
             </div>

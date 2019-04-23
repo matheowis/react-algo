@@ -29,3 +29,18 @@ export const connectedCells = (cellNameA,cellNameB) => {
     return [];
   }
 }
+
+export function isBetween(value, starts, ends, include) {
+  for (var s = 0; s < starts.length; s++) {
+    if (include) {
+      if (value >= starts[s] && value <= ends[s]) {
+        return true;
+      }
+    } else {
+      if (value > starts[s] && value < ends[s]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
