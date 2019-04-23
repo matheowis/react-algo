@@ -79,7 +79,7 @@ export function getStringsBetween(string, prevArr, endArr) {
 }
 
 
-export const OPERATORS = ['=', ';', '/', '*', '-', '+'];
+export const OPERATORS = ['=', ';', '/', '*', '-', '+','(',':',')'];
 
 export const isOperator = (char) => between(char.charCodeAt(0), [48, 65], [57, 90], true);
 

@@ -40,6 +40,7 @@ class AlgoContainer extends Component {
   gVariables = {
     holder: {},
     definedCells: {},
+    functionCells: {}
   };
   mainHolderKeys = [];
   algoFunctions= new AlgoFunctions(this.gVariables);
@@ -67,7 +68,9 @@ class AlgoContainer extends Component {
 
     if (algorithm[0] === "=") {
       //calculate
-      const outcome = eval(algorithm.slice(1));
+      // const outcome = eval(algorithm.slice(1));
+      const outcome = this.algoFunctions.CalculateLocal(item);
+      
       item.props.outcome = outcome;
       item.props.handleChange(outcome);
     }
@@ -75,7 +78,7 @@ class AlgoContainer extends Component {
 
   handleFocus = item => event => {
     this.Algo.currentItem = item;
-    console.log("item", item)
+    // console.log("item", item)
     const { algorithm } = item.props;
     this.gVariables.holder.active.setName(item.name);
     this.gVariables.holder.active.setAlgorithm(algorithm);
@@ -113,11 +116,11 @@ class AlgoContainer extends Component {
   handleMouseDown = item => event => {
     if(this.Algo.currentItem.props){
       const {algorithm} = this.Algo.currentItem.props;
-      const props = this.Algo.currentItem
+      const {props} = this.Algo.currentItem
       if(this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name){
         event.preventDefault();
         const selection = this.Algo.currentItem.props.ref.current.selectionStart;
-        console.log("algorithm[selection-1]",algorithm[selection-1])
+        // console.log("algorithm[selection-1]",algorithm[selection-1])
 
         if(this.Algo.selectedCell){
           props.algorithm = algorithm.replace(this.Algo.selectedCell, item.name);
@@ -125,10 +128,10 @@ class AlgoContainer extends Component {
         }else if(OPERATORS.includes(algorithm[selection-1])){
           this.Algo.selectedCell = item.name;
           props.algorithm = algorithm.slice(0,selection) + item.name + algorithm.slice(selection,algorithm.length)
-          console.log("props.algorithm",props.algorithm);
+          // console.log("props.algorithm",props.algorithm);
           this.Algo.currentItem.props.handleChange(props.algorithm);
         }
-        console.log("selection",selection);
+        // console.log("selection",selection);
       }
     }
 
@@ -140,7 +143,7 @@ class AlgoContainer extends Component {
   handleChange = item => event => {
     const selection = event.target.selectionStart;
     const value = event.target.value;
-    console.log("OPERATORS",OPERATORS);
+    // console.log("OPERATORS",OPERATORS);
     if(OPERATORS.includes(value[selection-1])){
       this.Algo.selectedCell = null;
     }
