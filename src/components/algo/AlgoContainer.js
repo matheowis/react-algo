@@ -210,6 +210,24 @@ class AlgoContainer extends Component {
     clipboardData = event.clipboardData || window.clipboardData;
     pastedData = clipboardData.getData('Text');
 
+    
+
+    const sideDiv = String.fromCharCode(9);
+    const HorizonDiv = String.fromCharCode(13,10);
+
+    const final = [];
+    const horizonSplit = pastedData.split(HorizonDiv);
+    for(var x =0;x< horizonSplit.length;x++){
+      const prevIndex = final.push([]) -1;
+      const sideSplit = horizonSplit[x].split(sideDiv);
+      for(var y=0;y<sideSplit.length;y++){
+        final[prevIndex].push(sideSplit[y]);
+      }
+    }
+
+
+    
+    console.log({final});
     // Do whatever with pasteddata
     for (var i = 0; i < pastedData.length; i++) {
       console.log(pastedData.charCodeAt(i), pastedData[i]);
@@ -219,7 +237,7 @@ class AlgoContainer extends Component {
   handleCopy = item => event => {
     var clipboardData, copiedData;
     const sideDiv = String.fromCharCode(9);
-    const HorizonDiv = String.fromCharCode(13) + String.fromCharCode(10);
+    const HorizonDiv = String.fromCharCode(13,10);
     // Stop data actually being pasted into div
 
     console.log("firstCopy", this.firstCopy)
