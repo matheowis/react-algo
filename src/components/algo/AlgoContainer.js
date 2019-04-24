@@ -5,6 +5,9 @@ import { numToLetters, OPERATORS } from "../../utils";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
 import { AlgoFunctions } from "../../functions/AlgoFunctions";
+import RightTools from "./RightTools";
+import Selectors from "./Selectors";
+
 const styles = {
   side: {
     minWidth: 24, maxWidth: 24,
@@ -37,11 +40,18 @@ const styles = {
 
 class AlgoContainer extends Component {
   // mainHolder = {};
+  state = {
+    open: false,
+    left: 0,
+    top: 0
+  }
+
   gVariables = {
     holder: {},
     definedCells: {},
     functionCells: {}
   };
+
   mainHolderKeys = [];
   algoFunctions = new AlgoFunctions(this.gVariables);
   Algo = { writing: false, currentItem: {}, selectedCell: null }
@@ -99,7 +109,7 @@ class AlgoContainer extends Component {
     }
     const algoItems = algorithm[0] === "=" ? this.algoFunctions.splitAlgorithm(algorithm) : [1];
     const canMove = !isNaN(algoItems[algoItems.length - 1]);
-    console.log({canMove});
+    console.log({ canMove });
     switch (event.key) {
       case "ArrowDown":
         canMove && blureItem(0, -1);
@@ -143,10 +153,23 @@ class AlgoContainer extends Component {
         // console.log("selection",selection);
       }
     }
+  }
 
-
-
-    //event.preventDefault();
+  handleMouseUp = item => event => {
+    console.log("handleMouseUp", event)
+    event.preventDefault()
+    const { clientX, clientY } = event;
+    if (event.button === 2) {
+      this.setState(() => ({
+        open: true,
+        left: clientX,
+        top: clientY
+      }))
+    } else {
+      this.setState(() => ({
+        open: false
+      }))
+    }
   }
 
   handleChange = item => event => {
@@ -162,25 +185,17 @@ class AlgoContainer extends Component {
     item.props.algorithm = value;
     item.props.handleChange(value);
     this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
-    // if (value[0] === "=") {
-    //   item.props.algorithm = value.slice(1);
-    //   this.setState(() => ({ value }))
-    //   // function mode
-    // } else {
-    //   item.props.outcome = value
-    //   this.setState(() => ({ value }))
-    // }
-
-    // console.log(e.target.value);
   }
 
   render() {
     const { classes } = this.props;
+    const { open, top, left } = this.state;
     return (
       <div style={{ width: "100%", height: "80%" }}>
+        <RightTools open={open} left={left} top={top} />
         <AlgoHeader active={this.gVariables.holder.active} />
         <div style={{ width: "100%", height: "100%", overflow: "auto", position: "relative" }}>
-          <div style={{ display: "flex", position: "sticky", top: 0, zIndex: 3 }}>
+          <div style={{ display: "flex", position: "sticky", top: 0, zIndex: 1000 }}>
             <div className={classes.side} />
             {this.mainHolderKeys[0].map((row, i) => (
               <div key={`row-top${i}`} className={classes.top}>{numToLetters(i)}</div>
@@ -188,7 +203,7 @@ class AlgoContainer extends Component {
           </div>
           {this.mainHolderKeys.map((row, i) => (
             <div key={`row${i}`} style={{ display: "flex" }}>
-              <div className={classes.side} style={{ position: "sticky", left: 0, zIndex: 2 }}>{i + 1}</div>
+              <div className={classes.side} style={{ position: "sticky", left: 0, zIndex: 999 }}>{i + 1}</div>
               {row.map(column => (
                 <AlgoCell
                   key={column.name}
@@ -198,10 +213,12 @@ class AlgoContainer extends Component {
                   onChange={this.handleChange}
                   onKeyDown={this.handleKeyDown}
                   onMouseDown={this.handleMouseDown}
+                  onMouseUp={this.handleMouseUp}
                 />
               ))}
             </div>
           ))}
+        <Selectors />
         </div>
       </div>
     )

@@ -93,7 +93,7 @@ export function lettersToNum(letters) {
   return num;
 }
 
-function splitCellName(name) {
+export function splitCellName(name) {
   let x = "";
   let y = "";
   for (var i = 0; i < name.length; i++) {

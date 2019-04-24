@@ -10,7 +10,8 @@ const styles = {
     cursor: "cell",
     "&:disabled": {
       backgroundColor: "white"
-    }
+    }, 
+    padding: "1px 0px"
   },
   selected: {
 
@@ -48,31 +49,6 @@ class AlgoCell extends Component {
   handleChange = (value) => {
     this.setState(() => ({value}));
   }
-  // handleBlur = () => {
-  //   const { item } = this.props;
-  //   if (item.props.algorithm !== "") {
-  //     console.log("Calculate");
-  //     // this.setState(() => ({value: item.props.}))
-  //   }
-  // }
-
-  // handleFocus = () => {
-
-  // }
-  // handleChange = e => {
-  //   const { item } = this.props
-  //   const value = e.target.value;
-  //   if (value[0] === "=") {
-  //     item.props.algorithm = value.slice(1);
-  //     this.setState(() => ({ value }))
-  //     // function mode
-  //   } else {
-  //     item.props.outcome = value
-  //     this.setState(() => ({ value }))
-  //   }
-
-  //   console.log(e.target.value);
-  // }
   render() {
     const { classes, item } = this.props;
     const { value } = this.state;
@@ -80,12 +56,14 @@ class AlgoCell extends Component {
       <div style={{ position: "relative" }}>
         <input
           type="text"
+          id={`cell-${item.name}`}
           className={classes.bar}
           onBlur={this.props.onBlur(item)}
           onFocus={this.props.onFocus(item)}
           onChange={this.props.onChange(item)}
           onKeyDown={this.props.onKeyDown(item)}
           onMouseDown={this.props.onMouseDown(item)}
+          onMouseUp={this.props.onMouseUp(item)}
           value={value}
           style={{ borderColor: this.state.color }}
           ref={this.myRef}
@@ -104,6 +82,7 @@ AlgoCell.propTypes = {
   onChange: PropTypes.func.isRequired,
   onKeyDown: PropTypes.func.isRequired,
   onMouseDown: PropTypes.func.isRequired,
+  onMouseUp: PropTypes.func.isRequired,
 }
 
 export default injectSheet(styles)(AlgoCell);
