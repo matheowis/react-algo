@@ -3,8 +3,8 @@ import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
 import { numToLetters, OPERATORS } from "../../utils";
 import { AlgoFunctions } from "../../functions/AlgoFunctions";
-import {CellSelections} from "../../functions/CellSelections";
-import {getCellsFromBox, getCellsFromBoxSpecial} from "../../functions/helpers";
+import { CellSelections } from "../../functions/CellSelections";
+import { getCellsFromBox, getCellsFromBoxSpecial } from "../../functions/helpers";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
 import RightTools from "./RightTools";
@@ -65,10 +65,11 @@ class AlgoContainer extends Component {
   //   start,
   //   end
   // }];
-  
+
   firstCopy = true;
   algoFunctions = new AlgoFunctions(this.gVariables);
   Algo = { writing: false, currentItem: {}, selectedCell: null }
+  textareaRef = React.createRef();
   componentWillMount() {
     const { rows, columns } = this.props;
     for (var x = 0; x < rows; x++) {
@@ -125,7 +126,7 @@ class AlgoContainer extends Component {
         const newName = `${numToLetters(y - nx)}${x + 1 - ny}`;
         this.gVariables.holder[newName].ref.current.focus();
         // this.cellFunctionHolder[0](newName, newName);
-        this.cellSelections.ChangeSelection(0,newName)
+        this.cellSelections.ChangeSelection(0, newName)
       }
     }
 
@@ -148,7 +149,7 @@ class AlgoContainer extends Component {
         break;
       case "Escape":
         item.props.ref.current.blur();
-        this.cellSelections.ChangeSelection(0,"")
+        this.cellSelections.ChangeSelection(0, "")
         break;
     }
 
@@ -158,8 +159,8 @@ class AlgoContainer extends Component {
   handleMouseDown = item => event => {
     this.pMouse.start = this.pMouse.end = item.name;
     // this.cellFunctionHolder[0](this.pMouse.start, this.pMouse.end);
-    this.cellSelections.ChangeSelection(0,this.pMouse.start, this.pMouse.end)
-    
+    this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
+
     if (this.Algo.currentItem.props) {
       const { props } = this.Algo.currentItem;
       const { algorithm } = props;
@@ -188,8 +189,8 @@ class AlgoContainer extends Component {
       this.pMouse.end = item.name;
       const { start, end } = this.pMouse
       // this.cellFunctionHolder[0](start, end);
-      this.cellSelections.ChangeSelection(0,start, end)
-      
+      this.cellSelections.ChangeSelection(0, start, end)
+
     }
   }
 
@@ -218,28 +219,44 @@ class AlgoContainer extends Component {
   handleCopy = item => event => {
     var clipboardData, copiedData;
     const sideDiv = String.fromCharCode(9);
-    const HorizonDiv = String.fromCharCode(13, 10);
+    const HorizonDiv = String.fromCharCode(13) + String.fromCharCode(10);
     // Stop data actually being pasted into div
 
-    console.log("firstCopy",this.firstCopy)
+    console.log("firstCopy", this.firstCopy)
     if (this.firstCopy) {
       this.firstCopy = false;
       event.stopPropagation();
       event.preventDefault();
 
-      console.log("Copy");
-      const holder = item.props.ref.current.value;
-      item.props.ref.current.value = "CopyValue";
-      item.props.ref.current.select();
+      const { start, end } = this.cellSelections.GetSelection(0);
+      const selection = getCellsFromBoxSpecial(start, end);
+      let newCopy = "";
+      for (var x = 0; x < selection.length; x++) {
+        for (var y = 0; y < selection[x].length; y++) {
+          const item = this.gVariables.holder[selection[x][y]].algorithm
+          const isLast = y === selection[x].length - 1
+          newCopy += isLast ? item : item + sideDiv;
+        }
+        newCopy += HorizonDiv;
+      }
+      console.log("Copy", newCopy);
+      for (var i = 0; i < newCopy.length; i++) {
+        console.log(newCopy.charCodeAt(i), newCopy[i]);
+      }
+      // const holder = item.props.ref.current.value;
+      // item.props.ref.current.value = newCopy;
+      // item.props.ref.current.select();
+      this.textareaRef.current.value = newCopy;
+      this.textareaRef.current.select();
       document.execCommand("copy");
-      item.props.ref.current.value = holder;
+      // item.props.ref.current.value = holder;
       // Get pasted data via clipboard API
-      clipboardData = event.clipboardData || window.clipboardData;
-      copiedData = clipboardData.getData('Text');
-      const selection = this.cellSelections.GetSelection(0)
-      console.log("selection",getCellsFromBoxSpecial(selection.start,selection.end));
-      
-      console.log({ copiedData });
+      // clipboardData = event.clipboardData || window.clipboardData;
+      // copiedData = clipboardData.getData('Text');
+
+      // console.log("selection",getCellsFromBoxSpecial(start,end));
+
+      // console.log({ copiedData });
     } else {
       this.firstCopy = true
     }
@@ -284,6 +301,7 @@ class AlgoContainer extends Component {
     const { open, top, left } = this.state;
     return (
       <div style={{ width: "100%", height: "80%" }}>
+        <textarea ref={this.textareaRef} style={{position:"fixed", top:-500,left:-500}}/>
         <RightTools open={open} left={left} top={top} />
         <AlgoHeader active={this.gVariables.holder.active} />
         <div style={{ width: "100%", height: "100%", overflow: "auto", position: "relative" }}>
@@ -314,7 +332,7 @@ class AlgoContainer extends Component {
               ))}
             </div>
           ))}
-          <Selectors cellSelections={this.cellSelections}/>
+          <Selectors cellSelections={this.cellSelections} />
         </div>
       </div>
     )
