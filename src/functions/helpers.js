@@ -39,6 +39,19 @@ export const getCellsFromBox = (cellNameA, cellNameB) => {
   return cells;
 }
 
+export const getCellsFromBoxSpecial = (cellNameA, cellNameB) => {
+  const a = splitCellName(cellNameA);
+  const b = splitCellName(cellNameB);
+  const cells = [];
+  for (var y = Math.min(a.y, b.y); y < Math.max(a.y, b.y) + 1; y++) {
+    var prevIndex = cells.push([]) - 1;
+    for (var x = Math.min(a.x, b.x); x < Math.max(a.x, b.x) + 1; x++) {
+      cells[prevIndex].push(`${numToLetters(x)}${y}`);
+    }
+  }
+  return cells;
+}
+
 export function isBetween(value, starts, ends, include) {
   for (var s = 0; s < starts.length; s++) {
     if (include) {

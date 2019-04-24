@@ -9,7 +9,7 @@ const styles = {
     pointerEvents: "none",
     position: "absolute",
     border: "solid",
-    transition: "width 0.3s, height 0.3s, left 0.3s, top 0.3s"
+    transition: "width 0.2s, height 0.2s, left 0.2s, top 0.2s"
   }
 }
 
@@ -20,7 +20,8 @@ class Selection extends Component {
   }
 
   componentDidMount() {
-    this.props.functionHolder[this.props.index] = this.handleChange;
+    // this.props.functionHolder[this.props.index] = this.handleChange;
+    this.props.cellSelections.CellInitialization(this.handleChange);
   }
 
   handleChange = (start, end) => {
@@ -62,7 +63,8 @@ class Selection extends Component {
 }
 
 Selection.propTypes = {
-  functionHolder: PropTypes.array.isRequired,
+  // functionHolder: PropTypes.array.isRequired,
+  cellSelections: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired
 }
 

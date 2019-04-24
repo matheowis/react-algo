@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
 import { numToLetters, OPERATORS } from "../../utils";
+import { AlgoFunctions } from "../../functions/AlgoFunctions";
+import {CellSelections} from "../../functions/CellSelections";
+import {getCellsFromBox, getCellsFromBoxSpecial} from "../../functions/helpers";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
-import { AlgoFunctions } from "../../functions/AlgoFunctions";
 import RightTools from "./RightTools";
 import Selectors from "./Selectors";
-
 const styles = {
   side: {
     minWidth: 24, maxWidth: 24,
@@ -52,7 +53,20 @@ class AlgoContainer extends Component {
     functionCells: {}
   };
 
+  pMouse = {
+    start: "",
+    end: ""
+  }
+
   mainHolderKeys = [];
+  // cellFunctionHolder = [];
+  cellSelections = new CellSelections(15);
+  // cellSelections = [{
+  //   start,
+  //   end
+  // }];
+  
+  firstCopy = true;
   algoFunctions = new AlgoFunctions(this.gVariables);
   Algo = { writing: false, currentItem: {}, selectedCell: null }
   componentWillMount() {
@@ -89,10 +103,10 @@ class AlgoContainer extends Component {
   handleFocus = item => event => {
     this.Algo.currentItem = item;
     const { algorithm, outcome } = item.props;
-    console.log("item.props", item.props);
+    // console.log("item.props", item.props);
 
     if (outcome[0] !== "=" && algorithm[0] === "=") {
-      console.log("switch!")
+      // console.log("switch!")
       item.props.handleChange(algorithm);
     }
     // console.log("item", item)
@@ -103,61 +117,137 @@ class AlgoContainer extends Component {
 
   handleKeyDown = item => event => {
     const { x, y, algorithm } = item.props;
-    const blureItem = (nx, ny) => {
-      const newName = `${numToLetters(y - nx)}${x + 1 - ny}`;
-      this.gVariables.holder[newName].ref.current.focus();
-    }
     const algoItems = algorithm[0] === "=" ? this.algoFunctions.splitAlgorithm(algorithm) : [1];
     const canMove = !isNaN(algoItems[algoItems.length - 1]);
-    console.log({ canMove });
+
+    const moveItem = (nx, ny) => {
+      if (canMove) {
+        const newName = `${numToLetters(y - nx)}${x + 1 - ny}`;
+        this.gVariables.holder[newName].ref.current.focus();
+        // this.cellFunctionHolder[0](newName, newName);
+        this.cellSelections.ChangeSelection(0,newName)
+      }
+    }
+
+    // console.log({ canMove });
     switch (event.key) {
       case "ArrowDown":
-        canMove && blureItem(0, -1);
+        canMove && moveItem(0, -1);
         break;
       case "ArrowUp":
-        canMove && blureItem(0, 1);
+        canMove && moveItem(0, 1);
         break;
       case "ArrowLeft":
-        canMove && blureItem(1, 0);
+        canMove && moveItem(1, 0);
         break;
       case "ArrowRight":
-        canMove && blureItem(-1, 0);
+        canMove && moveItem(-1, 0);
         break;
       case "Enter":
         item.props.ref.current.blur();
         break;
       case "Escape":
         item.props.ref.current.blur();
+        this.cellSelections.ChangeSelection(0,"")
         break;
     }
+
+
   }
 
   handleMouseDown = item => event => {
+    this.pMouse.start = this.pMouse.end = item.name;
+    // this.cellFunctionHolder[0](this.pMouse.start, this.pMouse.end);
+    this.cellSelections.ChangeSelection(0,this.pMouse.start, this.pMouse.end)
+    
     if (this.Algo.currentItem.props) {
-      const { algorithm } = this.Algo.currentItem.props;
-      const { props } = this.Algo.currentItem
+      const { props } = this.Algo.currentItem;
+      const { algorithm } = props;
       if (this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name) {
         event.preventDefault();
-        const selection = this.Algo.currentItem.props.ref.current.selectionStart;
-        // console.log("algorithm[selection-1]",algorithm[selection-1])
-
+        const selection = props.ref.current.selectionStart;
         if (this.Algo.selectedCell) {
           props.algorithm = algorithm.replace(this.Algo.selectedCell, item.name);
-          this.Algo.currentItem.props.handleChange(props.algorithm);
+          props.handleChange(props.algorithm);
         } else if (OPERATORS.includes(algorithm[selection - 1])) {
           this.Algo.selectedCell = item.name;
           props.algorithm = algorithm.slice(0, selection) + item.name + algorithm.slice(selection, algorithm.length)
-          // console.log("props.algorithm",props.algorithm);
-          this.Algo.currentItem.props.handleChange(props.algorithm);
+          props.handleChange(props.algorithm);
         }
         // console.log("selection",selection);
       }
     }
   }
 
+  handleMouseLeftUp = item => {
+    this.pMouse.start = this.pMouse.end = "";
+  }
+
+  handleMouseEnter = item => event => {
+    if (this.pMouse.start !== "") {
+      this.pMouse.end = item.name;
+      const { start, end } = this.pMouse
+      // this.cellFunctionHolder[0](start, end);
+      this.cellSelections.ChangeSelection(0,start, end)
+      
+    }
+  }
+
+  // TODEL
+  handleMouseLeave = item => event => {
+
+  }
+
+  handlePaste = item => event => {
+    var clipboardData, pastedData;
+
+    // Stop data actually being pasted into div
+    event.stopPropagation();
+    event.preventDefault();
+
+    // Get pasted data via clipboard API
+    clipboardData = event.clipboardData || window.clipboardData;
+    pastedData = clipboardData.getData('Text');
+
+    // Do whatever with pasteddata
+    for (var i = 0; i < pastedData.length; i++) {
+      console.log(pastedData.charCodeAt(i), pastedData[i]);
+    }
+  }
+
+  handleCopy = item => event => {
+    var clipboardData, copiedData;
+    const sideDiv = String.fromCharCode(9);
+    const HorizonDiv = String.fromCharCode(13, 10);
+    // Stop data actually being pasted into div
+
+    console.log("firstCopy",this.firstCopy)
+    if (this.firstCopy) {
+      this.firstCopy = false;
+      event.stopPropagation();
+      event.preventDefault();
+
+      console.log("Copy");
+      const holder = item.props.ref.current.value;
+      item.props.ref.current.value = "CopyValue";
+      item.props.ref.current.select();
+      document.execCommand("copy");
+      item.props.ref.current.value = holder;
+      // Get pasted data via clipboard API
+      clipboardData = event.clipboardData || window.clipboardData;
+      copiedData = clipboardData.getData('Text');
+      const selection = this.cellSelections.GetSelection(0)
+      console.log("selection",getCellsFromBoxSpecial(selection.start,selection.end));
+      
+      console.log({ copiedData });
+    } else {
+      this.firstCopy = true
+    }
+
+  }
+
   handleMouseUp = item => event => {
-    console.log("handleMouseUp", event)
-    event.preventDefault()
+    // event.preventDefault()
     const { clientX, clientY } = event;
     if (event.button === 2) {
       this.setState(() => ({
@@ -165,10 +255,12 @@ class AlgoContainer extends Component {
         left: clientX,
         top: clientY
       }))
-    } else {
+    } else if (this.state.open) {
       this.setState(() => ({
         open: false
       }))
+    } else {
+      this.handleMouseLeftUp(item);
     }
   }
 
@@ -214,11 +306,15 @@ class AlgoContainer extends Component {
                   onKeyDown={this.handleKeyDown}
                   onMouseDown={this.handleMouseDown}
                   onMouseUp={this.handleMouseUp}
+                  onMouseEnter={this.handleMouseEnter}
+                  onMouseLeave={this.handleMouseLeave}
+                  onPaste={this.handlePaste}
+                  onCopy={this.handleCopy}
                 />
               ))}
             </div>
           ))}
-        <Selectors />
+          <Selectors cellSelections={this.cellSelections}/>
         </div>
       </div>
     )

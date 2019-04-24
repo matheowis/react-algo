@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import Selection from "./Selection";
+import PropTypes from 'prop-types';
 
 class Selectors extends Component {
-  functionHolder = [];
-  // Anim tests (success)
+  // functionHolder = [];
+  // // Anim tests (success)
   // componentDidMount() {
   //   console.log("functionHolder", this.functionHolder);
   //   this.functionHolder[0]("A1", "F6");
@@ -18,19 +19,24 @@ class Selectors extends Component {
   //   }, 2000);
   // }
   render() {
-    const selectors = new Array(15).fill(0);
+    const {cellSelections} = this.props
+    const selectors = new Array(cellSelections.size).fill(0);
     return (
       <>
         {selectors.map((_, i) => (
           <Selection
             key={`Selection-${i}`}
             index={i}
-            functionHolder={this.functionHolder}
+            cellSelections={this.props.cellSelections}
           />
         ))}
       </>
     )
   }
+}
+
+Selectors.propTypes = {
+  cellSelections: PropTypes.object.isRequired
 }
 
 export default Selectors;

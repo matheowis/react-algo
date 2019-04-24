@@ -10,7 +10,7 @@ const styles = {
     cursor: "cell",
     "&:disabled": {
       backgroundColor: "white"
-    }, 
+    },
     padding: "1px 0px"
   },
   selected: {
@@ -47,7 +47,7 @@ class AlgoCell extends Component {
   }
 
   handleChange = (value) => {
-    this.setState(() => ({value}));
+    this.setState(() => ({ value }));
   }
   render() {
     const { classes, item } = this.props;
@@ -64,12 +64,15 @@ class AlgoCell extends Component {
           onKeyDown={this.props.onKeyDown(item)}
           onMouseDown={this.props.onMouseDown(item)}
           onMouseUp={this.props.onMouseUp(item)}
+          onMouseEnter={this.props.onMouseEnter(item)}
+          onMouseLeave={this.props.onMouseLeave(item)}
+          onPaste={this.props.onPaste(item)}
+          onCopy={this.props.onCopy(item)}
           value={value}
           style={{ borderColor: this.state.color }}
           ref={this.myRef}
         />
-        {/* <MultiColorInput /> */}
-        {this.state.selected && <div className={classes.graber} />}
+        {/* {this.state.selected && <div className={classes.graber} />} */}
       </div>
     )
   }
@@ -83,6 +86,10 @@ AlgoCell.propTypes = {
   onKeyDown: PropTypes.func.isRequired,
   onMouseDown: PropTypes.func.isRequired,
   onMouseUp: PropTypes.func.isRequired,
+  onMouseEnter: PropTypes.func.isRequired,
+  onMouseLeave: PropTypes.func.isRequired,
+  onPaste: PropTypes.func.isRequired,
+  onCopy: PropTypes.func.isRequired,
 }
 
 export default injectSheet(styles)(AlgoCell);
