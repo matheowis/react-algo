@@ -1,5 +1,5 @@
 import { ALGO_FUNCTIONS } from "./constant";
-import { isBetween } from "./helpers";
+import { isBetween, splitCellName } from "./helpers";
 
 class AlgoFunctions {
   constructor(gVariables) {
@@ -132,6 +132,21 @@ class AlgoFunctions {
       }
     }
     return parts;
+  }
+
+  SelectionGroups = parts => {
+    const newParts = []
+    var i = 0;
+    while (i < parts.length) {
+      if (splitCellName(parts[i])) {
+        newParts.push({start: parts[i], end:parts[i]});
+      } else if (parts[i] === ":") {
+        newParts[newParts.length - 1].end = parts[i + 1];
+        i++;
+      }
+      i++;
+    }
+    return newParts;
   }
 
   flatAlgorithm = (outerParts = []) => {

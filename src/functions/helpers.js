@@ -110,11 +110,17 @@ export function splitCellName(name) {
   let x = "";
   let y = "";
   for (var i = 0; i < name.length; i++) {
+    if(!isBetween(name.charCodeAt(i), [48, 65], [57, 90], true)){
+      return null;
+    }
     if (isNaN(name[i])) {
       x += name[i];
     } else {
       y += name[i];
     }
+  }
+  if(x === "" || y === ""){
+    return null
   }
   x = lettersToNum(x);
   y = parseFloat(y);
