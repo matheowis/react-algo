@@ -9,6 +9,8 @@ import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
 import RightTools from "./RightTools";
 import Selectors from "./Selectors";
+import MultiColorInput from "../MultiColorInput";
+
 const styles = {
   root: {
     width: "100%",
@@ -75,13 +77,8 @@ const styles = {
     zIndex: 999
   }
 }
-// TODEL
-// mainHolderDefault = {
-//   "A1":{algorithm:"", outcome:"", isOver:false, static:}
-// }
 
 class AlgoContainer extends Component {
-  // mainHolder = {};
   state = {
     open: false,
     left: 0,
@@ -100,16 +97,11 @@ class AlgoContainer extends Component {
   }
 
   mainHolderKeys = [];
-  // cellFunctionHolder = [];
   cellSelections = new CellSelections(15);
-  // cellSelections = [{
-  //   start,
-  //   end
-  // }];
-
-  firstCopy = true;
   algoFunctions = new AlgoFunctions(this.gVariables);
   Algo = { writing: false, currentItem: {}, selectedCell: null }
+ 
+  firstCopy = true;
   textareaRef = React.createRef();
   componentWillMount() {
     const { rows, columns } = this.props;
@@ -133,8 +125,6 @@ class AlgoContainer extends Component {
     this.gVariables.holder.active.item = null;
 
     if (algorithm[0] === "=") {
-      // calculate
-      // const outcome = eval(algorithm.slice(1));
       const outcome = this.algoFunctions.CalculateLocal(item);
 
       item.props.outcome = outcome;
@@ -166,7 +156,6 @@ class AlgoContainer extends Component {
       if (canMove) {
         const newName = `${numToLetters(y - nx)}${x + 1 - ny}`;
         this.gVariables.holder[newName].ref.current.focus();
-        // this.cellFunctionHolder[0](newName, newName);
         this.cellSelections.ChangeSelection(0, newName)
       }
     }
@@ -202,10 +191,10 @@ class AlgoContainer extends Component {
 
   handleMouseDown = item => event => {
     this.pMouse.start = this.pMouse.end = item.name;
-    // this.cellFunctionHolder[0](this.pMouse.start, this.pMouse.end);
     this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
 
-    if (this.Algo.currentItem.props) {
+    console.log("Down", this.Algo.currentItem.props);
+    if (this.Algo.currentItem.props) { // currently focused item
       const { props } = this.Algo.currentItem;
       const { algorithm } = props;
       if (this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name) {
@@ -226,6 +215,7 @@ class AlgoContainer extends Component {
 
   handleMouseLeftUp = item => {
     this.pMouse.start = this.pMouse.end = "";
+
   }
 
   handleMouseEnter = item => event => {
@@ -236,11 +226,6 @@ class AlgoContainer extends Component {
       this.cellSelections.ChangeSelection(0, start, end)
 
     }
-  }
-
-  // TODEL
-  handleMouseLeave = item => event => {
-
   }
 
   handlePaste = item => event => {
@@ -355,6 +340,7 @@ class AlgoContainer extends Component {
     const { open, top, left } = this.state;
     return (
       <div className={classes.root}>
+      <MultiColorInput />
         <textarea ref={this.textareaRef} className={classes.copyHolder} />
         <RightTools open={open} left={left} top={top} />
         <AlgoHeader active={this.gVariables.holder.active} />
@@ -379,7 +365,6 @@ class AlgoContainer extends Component {
                   onMouseDown={this.handleMouseDown}
                   onMouseUp={this.handleMouseUp}
                   onMouseEnter={this.handleMouseEnter}
-                  onMouseLeave={this.handleMouseLeave}
                   onPaste={this.handlePaste}
                   onCopy={this.handleCopy}
                 />

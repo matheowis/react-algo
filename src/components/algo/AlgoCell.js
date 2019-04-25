@@ -4,17 +4,19 @@ import PropTypes from 'prop-types';
 
 const styles = {
   bar: {
-    width: 100,
+    width:100,
     height: 24,
     fontSize: 18,
     cursor: "cell",
+    padding: "1px 0px",
     "&:disabled": {
       backgroundColor: "white"
     },
-    padding: "1px 0px"
-  },
-  selected: {
-
+    // "&:focus":{
+    //   width:600,
+    //   zIndex:2,
+    //   position:"absolute"
+    // },
   },
   graber: {
     width: 4,
@@ -65,7 +67,6 @@ class AlgoCell extends Component {
           onMouseDown={this.props.onMouseDown(item)}
           onMouseUp={this.props.onMouseUp(item)}
           onMouseEnter={this.props.onMouseEnter(item)}
-          onMouseLeave={this.props.onMouseLeave(item)}
           onPaste={this.props.onPaste(item)}
           onCopy={this.props.onCopy(item)}
           value={value}
@@ -87,7 +88,6 @@ AlgoCell.propTypes = {
   onMouseDown: PropTypes.func.isRequired,
   onMouseUp: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
-  onMouseLeave: PropTypes.func.isRequired,
   onPaste: PropTypes.func.isRequired,
   onCopy: PropTypes.func.isRequired,
 }
