@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { numToLetters, OPERATORS } from "../../utils";
 import { AlgoFunctions } from "../../functions/AlgoFunctions";
 import { CellSelections } from "../../functions/CellSelections";
-import { getCellsFromBox, getCellsFromBoxSpecial } from "../../functions/helpers";
+import { getCellsFromBox, getCellsFromBoxSpecial, splitCellName } from "../../functions/helpers";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
 import RightTools from "./RightTools";
@@ -210,28 +210,22 @@ class AlgoContainer extends Component {
     clipboardData = event.clipboardData || window.clipboardData;
     pastedData = clipboardData.getData('Text');
 
-    
-
     const sideDiv = String.fromCharCode(9);
     const HorizonDiv = String.fromCharCode(13,10);
 
-    const final = [];
     const horizonSplit = pastedData.split(HorizonDiv);
-    for(var x =0;x< horizonSplit.length;x++){
-      const prevIndex = final.push([]) -1;
-      const sideSplit = horizonSplit[x].split(sideDiv);
-      for(var y=0;y<sideSplit.length;y++){
-        final[prevIndex].push(sideSplit[y]);
+    const nameSplit = splitCellName(item.name);
+    for(var y =0;y< horizonSplit.length;y++){
+      const sideSplit = horizonSplit[y].split(sideDiv);
+      for(var x=0;x<sideSplit.length;x++){
+        const pasteItem = this.gVariables.holder[`${numToLetters(x + nameSplit.x)}${y + nameSplit.y}`]
+        pasteItem.handleChange(sideSplit[x]);
       }
     }
 
-
-    
-    console.log({final});
-    // Do whatever with pasteddata
-    for (var i = 0; i < pastedData.length; i++) {
-      console.log(pastedData.charCodeAt(i), pastedData[i]);
-    }
+    // for (var i = 0; i < pastedData.length; i++) {
+    //   console.log(pastedData.charCodeAt(i), pastedData[i]);
+    // }
   }
 
   handleCopy = item => event => {
