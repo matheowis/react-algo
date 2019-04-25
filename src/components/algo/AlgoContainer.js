@@ -10,17 +10,26 @@ import AlgoHeader from "./AlgoHeader";
 import RightTools from "./RightTools";
 import Selectors from "./Selectors";
 const styles = {
-  side: {
-    minWidth: 24, maxWidth: 24,
-    background: "#ccc",
-    padding: 4,
-    lineHeight: "",
-    border: "solid",
-    borderWidth: 1,
-    borderColor: "#aaa",
-    textAlign: "center",
-    borderRight: "none",
-    borderBottom: "none",
+  root: {
+    width: "100%",
+    height: "80%",
+  },
+  copyHolder: {
+    position: "fixed",
+    top: -500,
+    left: -500
+  },
+  mainTable: {
+    width: "100%",
+    height: "100%",
+    overflow: "auto",
+    position: "relative"
+  },
+  letterHeader: {
+    display: "flex",
+    position: "sticky",
+    top: 0,
+    zIndex: 1000
   },
   top: {
     minWidth: 101,
@@ -32,6 +41,38 @@ const styles = {
     background: "#ccc",
     borderColor: "#aaa",
     textAlign: "center"
+  },
+  side: {
+    minWidth: 24,
+    maxWidth: 24,
+    background: "#ccc",
+    padding: 4,
+    lineHeight: "",
+    border: "solid",
+    borderWidth: 1,
+    borderColor: "#aaa",
+    textAlign: "center",
+    borderRight: "none",
+    borderBottom: "none",
+  },
+  flex: {
+    display: "flex"
+  },
+  sideHeader: {
+    minWidth: 24,
+    maxWidth: 24,
+    background: "#ccc",
+    padding: 4,
+    lineHeight: "",
+    border: "solid",
+    borderWidth: 1,
+    borderColor: "#aaa",
+    textAlign: "center",
+    borderRight: "none",
+    borderBottom: "none",
+    position: "sticky",
+    left: 0,
+    zIndex: 999
   }
 }
 // TODEL
@@ -130,7 +171,7 @@ class AlgoContainer extends Component {
       }
     }
 
-    // console.log({ canMove });
+    console.log({ key:event.key });
     switch (event.key) {
       case "ArrowDown":
         canMove && moveItem(0, -1);
@@ -151,6 +192,9 @@ class AlgoContainer extends Component {
         item.props.ref.current.blur();
         this.cellSelections.ChangeSelection(0, "")
         break;
+        case "Delete":{
+          this.handleDelete();
+        }
     }
 
 
@@ -211,13 +255,13 @@ class AlgoContainer extends Component {
     pastedData = clipboardData.getData('Text');
 
     const sideDiv = String.fromCharCode(9);
-    const HorizonDiv = String.fromCharCode(13,10);
+    const HorizonDiv = String.fromCharCode(13, 10);
 
     const horizonSplit = pastedData.split(HorizonDiv);
     const nameSplit = splitCellName(item.name);
-    for(var y =0;y< horizonSplit.length;y++){
+    for (var y = 0; y < horizonSplit.length; y++) {
       const sideSplit = horizonSplit[y].split(sideDiv);
-      for(var x=0;x<sideSplit.length;x++){
+      for (var x = 0; x < sideSplit.length; x++) {
         const pasteItem = this.gVariables.holder[`${numToLetters(x + nameSplit.x)}${y + nameSplit.y}`]
         pasteItem.handleChange(sideSplit[x]);
       }
@@ -231,7 +275,7 @@ class AlgoContainer extends Component {
   handleCopy = item => event => {
     var clipboardData, copiedData;
     const sideDiv = String.fromCharCode(9);
-    const HorizonDiv = String.fromCharCode(13,10);
+    const HorizonDiv = String.fromCharCode(13, 10);
     // Stop data actually being pasted into div
 
     console.log("firstCopy", this.firstCopy)
@@ -251,28 +295,26 @@ class AlgoContainer extends Component {
         }
         newCopy += HorizonDiv;
       }
-      console.log("Copy", newCopy);
-      for (var i = 0; i < newCopy.length; i++) {
-        console.log(newCopy.charCodeAt(i), newCopy[i]);
-      }
-      // const holder = item.props.ref.current.value;
-      // item.props.ref.current.value = newCopy;
-      // item.props.ref.current.select();
+      // console.log("Copy", newCopy);
+      // for (var i = 0; i < newCopy.length; i++) {
+      //   console.log(newCopy.charCodeAt(i), newCopy[i]);
+      // }
+
       this.textareaRef.current.value = newCopy;
       this.textareaRef.current.select();
       document.execCommand("copy");
-      // item.props.ref.current.value = holder;
-      // Get pasted data via clipboard API
-      // clipboardData = event.clipboardData || window.clipboardData;
-      // copiedData = clipboardData.getData('Text');
-
-      // console.log("selection",getCellsFromBoxSpecial(start,end));
-
-      // console.log({ copiedData });
     } else {
       this.firstCopy = true
     }
 
+  }
+
+  handleDelete = () => {
+    const {start,end} = this.cellSelections.GetSelection(0);
+    const cellBox = getCellsFromBox(start,end);
+    for(var i =0;i< cellBox.length;i++){
+      this.gVariables.holder[cellBox[i]].handleChange("");
+    }
   }
 
   handleMouseUp = item => event => {
@@ -312,20 +354,20 @@ class AlgoContainer extends Component {
     const { classes } = this.props;
     const { open, top, left } = this.state;
     return (
-      <div style={{ width: "100%", height: "80%" }}>
-        <textarea ref={this.textareaRef} style={{position:"fixed", top:-500,left:-500}}/>
+      <div className={classes.root}>
+        <textarea ref={this.textareaRef} className={classes.copyHolder} />
         <RightTools open={open} left={left} top={top} />
         <AlgoHeader active={this.gVariables.holder.active} />
-        <div style={{ width: "100%", height: "100%", overflow: "auto", position: "relative" }}>
-          <div style={{ display: "flex", position: "sticky", top: 0, zIndex: 1000 }}>
+        <div className={classes.mainTable}>
+          <div className={classes.letterHeader}>
             <div className={classes.side} />
             {this.mainHolderKeys[0].map((row, i) => (
               <div key={`row-top${i}`} className={classes.top}>{numToLetters(i)}</div>
             ))}
           </div>
           {this.mainHolderKeys.map((row, i) => (
-            <div key={`row${i}`} style={{ display: "flex" }}>
-              <div className={classes.side} style={{ position: "sticky", left: 0, zIndex: 999 }}>{i + 1}</div>
+            <div key={`row${i}`} className={classes.flex}>
+              <div className={classes.side}>{i + 1}</div>
               {row.map(column => (
                 <AlgoCell
                   key={column.name}
