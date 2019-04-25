@@ -33,13 +33,13 @@ const styles = {
     top: 0,
     zIndex: 1000
   },
-  top: {
-    minWidth: 101,
+  topHeader: {
+    minWidth: 100,
     border: "solid",
     borderWidth: 1,
     borderRight: "none",
     borderBottom: "none",
-    padding: 1,
+    padding: "1px 0px",
     background: "#ccc",
     borderColor: "#aaa",
     textAlign: "center"
@@ -340,7 +340,7 @@ class AlgoContainer extends Component {
     const { open, top, left } = this.state;
     return (
       <div className={classes.root}>
-      <MultiColorInput />
+      
         <textarea ref={this.textareaRef} className={classes.copyHolder} />
         <RightTools open={open} left={left} top={top} />
         <AlgoHeader active={this.gVariables.holder.active} />
@@ -348,7 +348,7 @@ class AlgoContainer extends Component {
           <div className={classes.letterHeader}>
             <div className={classes.side} />
             {this.mainHolderKeys[0].map((row, i) => (
-              <div key={`row-top${i}`} className={classes.top}>{numToLetters(i)}</div>
+              <div key={`row-top${i}`} className={classes.topHeader}>{numToLetters(i)}</div>
             ))}
           </div>
           {this.mainHolderKeys.map((row, i) => (

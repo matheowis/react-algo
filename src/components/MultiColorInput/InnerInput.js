@@ -12,11 +12,11 @@ class InnerInput extends Component {
     const { structure, classes } = this.props;
     console.log("this.props", this.props);
     return (
-      <div>
+      <>
         {structure.map((item, i) => (
           <span key={`TestSpan-${i}`} className={classes[`color${item.colorID}`]}>{item.text}</span>
         ))}
-      </div>
+      </>
     )
   }
 }

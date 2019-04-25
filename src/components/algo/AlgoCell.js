@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
+import MultiColorInput from "../MultiColorInput";
 
 const styles = {
   bar: {
     width:100,
     height: 24,
+    lineHeight:"24px",
     fontSize: 18,
     cursor: "cell",
     padding: "1px 0px",
+    borderStyle:'solid none none solid',
+    borderColor:"#999",
+    borderWidth:1,
     "&:disabled": {
       backgroundColor: "white"
     },
@@ -56,23 +61,22 @@ class AlgoCell extends Component {
     const { value } = this.state;
     return (
       <div style={{ position: "relative" }}>
-        <input
-          type="text"
-          id={`cell-${item.name}`}
-          className={classes.bar}
-          onBlur={this.props.onBlur(item)}
-          onFocus={this.props.onFocus(item)}
-          onChange={this.props.onChange(item)}
-          onKeyDown={this.props.onKeyDown(item)}
-          onMouseDown={this.props.onMouseDown(item)}
-          onMouseUp={this.props.onMouseUp(item)}
-          onMouseEnter={this.props.onMouseEnter(item)}
-          onPaste={this.props.onPaste(item)}
-          onCopy={this.props.onCopy(item)}
-          value={value}
-          style={{ borderColor: this.state.color }}
-          ref={this.myRef}
-        />
+      <MultiColorInput 
+        id={`cell-${item.name}`}
+        className={classes.bar}
+        onBlur={this.props.onBlur(item)}
+        onFocus={this.props.onFocus(item)}
+        onChange={this.props.onChange(item)}
+        onKeyDown={this.props.onKeyDown(item)}
+        onMouseDown={this.props.onMouseDown(item)}
+        onMouseUp={this.props.onMouseUp(item)}
+        onMouseEnter={this.props.onMouseEnter(item)}
+        onPaste={this.props.onPaste(item)}
+        onCopy={this.props.onCopy(item)}
+        // value={value}
+        // style={{ borderColor: this.state.color }}
+        ref={this.myRef}
+      />
         {/* {this.state.selected && <div className={classes.graber} />} */}
       </div>
     )

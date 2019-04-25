@@ -50,27 +50,26 @@ class MultiColorInput extends Component {
 
   handleFocus = event => {
     this.valueHolder = mciFunctions.getString(event.target);
-    this.props.onFocus(evnet);
+    this.props.onFocus(event);
   }
 
   render() {
+    const {classes} = this.props;
     return (
       <div
-        contentEditable="true"
+        id={this.props.id}
+        className={`${classes.input} ${this.props.className}`}
+        contentEditable
+        suppressContentEditableWarning
         onKeyDown={this.handleKeyDown}
         onBlur={this.handleBlure}
         onFocus={this.handleFocus}
-
         onMouseDown={this.props.onMouseDown}
         onMouseUp={this.props.onMouseUp}
         onMouseEnter={this.props.onMouseEnter}
         onPaste={this.props.onPaste}
         onCopy={this.props.onCopy}
-        style={{
-          width: 100,
-          whiteSpace: "nowrap",
-          overflow: "initial"
-        }}>
+        >
         <span style={{ color: "blue" }}>var</span>
         <span>foo =</span>
         <span style={{ color: "green" }}>"bar"</span>
@@ -99,6 +98,7 @@ MultiColorInput.propTypes = {
   onMouseEnter: PropTypes.func,
   onPaste: PropTypes.func,
   onCopy: PropTypes.func,
+  id: PropTypes.string
 }
 
 MultiColorInput.defaultProps = {
@@ -111,6 +111,8 @@ MultiColorInput.defaultProps = {
   onMouseEnter: () => { },
   onPaste: () => { },
   onCopy: () => { },
+  id:"",
+  className:""
 }
 
 
