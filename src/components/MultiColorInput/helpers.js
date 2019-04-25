@@ -10,18 +10,18 @@ function getSelection(target) {
   const startIndex = nodes.indexOf(range.startContainer.parentElement);
   const endIndex = nodes.indexOf(range.endContainer.parentElement);
   const texts = nodes.map(node => node.textContent);
-  let startSelection = 0;
+  let selectionStart = 0;
   for (var i = 0; i < startIndex; i++) {
-    startSelection += texts[i].length
+    selectionStart += texts[i].length
   }
-  startSelection += range.startOffset;
-  let endSelection = texts[startIndex].length - range.startOffset;
+  selectionStart += range.startOffset;
+  let selectionEnd = texts[startIndex].length - range.startOffset;
   for (var i = startIndex + 1; i < endIndex; i++) {
-    endSelection += texts[i].length;
+    selectionEnd += texts[i].length;
   }
-  endSelection += range.endOffset + startSelection;
+  selectionEnd += range.endOffset + selectionStart;
 
-  return { startIndex, endIndex, startSelection, endSelection }
+  return { startIndex, endIndex, selectionStart, selectionEnd }
 }
 
 function getString(target) {
@@ -33,7 +33,7 @@ function getString(target) {
 function getAfterErase(event) {
   const selection = getSelection(event.target);
   const value = getString(event.target);
-  return value.slice(0,selection.startSelection) + value.slice(selection.endSelection);
+  return value.slice(0,selection.selectionStart) + value.slice(selection.selectionEnd);
 }
 
 export { mciFunctions }

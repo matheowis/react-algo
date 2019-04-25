@@ -1,73 +1,56 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import InnerInput from "./InnerInput";
+import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
 import { mciFunctions } from "./helpers";
 
+const styles = {
+  input: {
+    width: 100,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    "&:focus": {
+      overflow: "initial",
+    }
+  }
+}
+
 class MultiColorInput extends Component {
+
   valueHolder = "";
+
   handleKeyDown = (event) => {
+    this.props.onKeyDown(event);
     const { key, target } = event;
-    console.log("key=", e.key);
     e.preventDefault();
     if (key === "Backspace" || key === "Delete") {
       this.valueHolder = mciFunctions.getAfterErase(event);
+      const selection = mciFunctions.getSelection(target);
+      this.props.onChange({ value: this.valueHolder, ...selection });
     } else if (e.key.length === 1) {
-      const value2 = mciFunctions.getString(e.target);
-      console.log({ value2 });
-      //get Key from event
       this.valueHolder += e.key;
-      console.log(this.valueHolder)
-      const value = e.target.innerHTML;
-      // e.target.innerHTML = "a"
-      const range = window.getSelection().getRangeAt(0)
-      // console.log({range});
-      // const mainDiv = 
-      // const inputChildrens = 
-      const target = e.target;
-      // console.dir(target);
 
-      // let fullValue = "";
-      // const children = e.target.children
-      // for (var i = 0; i < children.length; i++) {
-      //   fullValue += children[i].textContent;
-      // }
-      // const testParts = fullValue.split(".");
-      // fullValue+= e.key;
+      const selection = mciFunctions.getSelection(target);
+      this.props.onChange({ value: this.valueHolder, ...selection });
 
-      const testParts = this.valueHolder.split(".");
-      const structure = testParts.map((part, i) => {
-        const isLast = i !== testParts.length - 1
-        return {
-          text: isLast ? part + e.key : part + ".",
-          colorID: i
-        }
-      })
-      console.log({ structure });
-      // console.log({ fullValue })
-      // const structure = [];
-      // e.target.children.map(child => {
-      //   fullValue += child.textContent
-      // })
+      const structure = this.props.createSegments(this.valueHolder)
 
       const elem = document.createElement('div');
-      const JSX = (<InnerInput
-        structure={structure}
-      // structure={[
-      //   { text: "ABC", colorID: 0 },
-      //   { text: " ABC2", colorID: 6 },
-      // ]}
-      />);
+      const JSX = (<InnerInput structure={structure} />);
 
-      ReactDOM.render(JSX, elem, () => {
-        // console.log("Change DIV", elem.innerHTML);
-        // console.dir(elem)
-        target.innerHTML = elem.innerHTML;
-      });
-      // range.commonAncestorContainer.parentElement.parentElement.children
-      // console.log("nodeType", range.startContainer.nodeType)
-      console.log(window.getSelection());
+      ReactDOM.render(JSX, elem, () => { target.innerHTML = elem.innerHTML });
     }
+  }
+
+  handleBlure = event => {
+    this.valueHolder = "";
+    this.props.onBlur(event);
+  }
+
+  handleFocus = event => {
+    this.valueHolder = mciFunctions.getString(event.target);
+    this.props.onFocus(evnet);
   }
 
   render() {
@@ -75,7 +58,14 @@ class MultiColorInput extends Component {
       <div
         contentEditable="true"
         onKeyDown={this.handleKeyDown}
-        onFocus={e => { console.log("Focus", e.target) }}
+        onBlur={this.handleBlure}
+        onFocus={this.handleFocus}
+
+        onMouseDown={this.props.onMouseDown}
+        onMouseUp={this.props.onMouseUp}
+        onMouseEnter={this.props.onMouseEnter}
+        onPaste={this.props.onPaste}
+        onCopy={this.props.onCopy}
         style={{
           width: 100,
           whiteSpace: "nowrap",
@@ -99,8 +89,30 @@ MultiColorInput.propTypes = {
   *   {text:"test", colorID:5}
   * ]
   */
-  createSegments:PropTypes.func.isRequired
+  createSegments: PropTypes.func.isRequired,
+  onBlur: PropTypes.func,
+  onFocus: PropTypes.func,
+  onChange: PropTypes.func,
+  onKeyDown: PropTypes.func,
+  onMouseDown: PropTypes.func,
+  onMouseUp: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onPaste: PropTypes.func,
+  onCopy: PropTypes.func,
+}
+
+MultiColorInput.defaultProps = {
+  onBlur: () => { },
+  onFocus: () => { },
+  onChange: () => { },
+  onKeyDown: () => { },
+  onMouseDown: () => { },
+  onMouseUp: () => { },
+  onMouseEnter: () => { },
+  onPaste: () => { },
+  onCopy: () => { },
 }
 
 
-export default MultiColorInput
+
+export default injectSheet(styles)(MultiColorInput);
