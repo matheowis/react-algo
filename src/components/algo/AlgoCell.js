@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
 import MultiColorInput from "../MultiColorInput";
+import {CELL_SIZE} from "../../constant";
 
 const styles = {
   bar: {
     width:100,
-    height: 24,
-    lineHeight:"24px",
+    width:CELL_SIZE.X - 1,//wBorder = 1
+    height: CELL_SIZE.Y - 3,//hBorder = 1, hPadding =2
+    lineHeight:`${CELL_SIZE.Y - 3}px`,
     fontSize: 18,
     cursor: "cell",
     padding: "1px 0px",
@@ -67,15 +69,14 @@ class AlgoCell extends Component {
         onBlur={this.props.onBlur(item)}
         onFocus={this.props.onFocus(item)}
         onChange={this.props.onChange(item)}
+        createSegments={this.props.createSegments(item)}
         onKeyDown={this.props.onKeyDown(item)}
         onMouseDown={this.props.onMouseDown(item)}
         onMouseUp={this.props.onMouseUp(item)}
         onMouseEnter={this.props.onMouseEnter(item)}
         onPaste={this.props.onPaste(item)}
         onCopy={this.props.onCopy(item)}
-        // value={value}
-        // style={{ borderColor: this.state.color }}
-        ref={this.myRef}
+        customRef={this.myRef}
       />
         {/* {this.state.selected && <div className={classes.graber} />} */}
       </div>
@@ -88,6 +89,7 @@ AlgoCell.propTypes = {
   onBlur: PropTypes.func.isRequired,
   onFocus: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
+  createSegments: PropTypes.func.isRequired,
   onKeyDown: PropTypes.func.isRequired,
   onMouseDown: PropTypes.func.isRequired,
   onMouseUp: PropTypes.func.isRequired,

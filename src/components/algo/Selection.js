@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
-import { opacityHex, colorsHex } from "../../utils";
+import {COLORS_HEX,OPACITY_HEX,CELL_SIZE} from "../../constant";
 import { splitCellName } from "../../functions/helpers";
 
 const styles = {
@@ -32,11 +32,12 @@ class Selection extends Component {
     const valid = start !== "" && end !== "";
     const startSplit = splitCellName(start);
     const endSplit = splitCellName(end);
+    const {X,Y} = CELL_SIZE;
     return valid ? {
-      left: Math.min(startSplit.x, endSplit.x) * 104 + 33,
-      top: (Math.min(startSplit.y, endSplit.y) - 1) * 30 + 21,
-      width: (Math.abs(startSplit.x - endSplit.x) + 1) * 104 - 4,
-      height: (Math.abs(startSplit.y - endSplit.y) + 1) * 30 - 4
+      left: Math.min(startSplit.x, endSplit.x) * X + 33,
+      top: (Math.min(startSplit.y, endSplit.y) - 1) * Y + 21,
+      width: (Math.abs(startSplit.x - endSplit.x) + 1) * X - 4,
+      height: (Math.abs(startSplit.y - endSplit.y) + 1) * Y - 4
     } : {
         left: 0,
         top: 0,
@@ -51,8 +52,8 @@ class Selection extends Component {
         className={classes.base}
         style={{
           ...this.getBoxPositionStyles(),
-          background: colorsHex[index % colorsHex.length] + opacityHex,
-          borderColor: colorsHex[index % colorsHex.length],
+          background: COLORS_HEX[index % COLORS_HEX.length] + OPACITY_HEX,
+          borderColor: COLORS_HEX[index % COLORS_HEX.length],
           zIndex: 100 + index,
         }}
       />

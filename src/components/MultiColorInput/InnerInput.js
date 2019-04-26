@@ -1,20 +1,31 @@
 import React, { Component } from 'react';
 import injectSheet from 'react-jss';
-import { colorsHex } from "../../utils";
+import { COLORS_HEX } from "../../constant";
 
-const styles = colorsHex.reduce((result, item, i) => {
-  result[`color${i}`] = { color: item }
+const styles = COLORS_HEX.reduce((result, item, i) => {
+  result[`color${i}`] = { color: item, background: "#fff" }
   return result;
 }, {});
+
+Object.assign(styles,{
+  colorB:{
+    color:"#222"
+  }
+});
 
 class InnerInput extends Component {
   render() {
     const { structure, classes } = this.props;
-    console.log("this.props", this.props);
     return (
       <>
         {structure.map((item, i) => (
-          <span key={`TestSpan-${i}`} className={classes[`color${item.colorID}`]}>{item.text}</span>
+          <span
+            key={`innerSpan${i}`}
+            id={`innerSpan${i}`}
+            className={classes[`color${item.colorID}`]}
+          >
+            {item.text}
+          </span>
         ))}
       </>
     )

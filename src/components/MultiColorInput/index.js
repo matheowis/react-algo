@@ -4,17 +4,25 @@ import InnerInput from "./InnerInput";
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
 import { mciFunctions } from "./helpers";
-
+import { CELL_SIZE } from "../../constant";
 const styles = {
   input: {
-    width: 100,
+    width: CELL_SIZE.X - 1,
     whiteSpace: "nowrap",
     overflow: "hidden",
     "&:focus": {
+      position: "absolute",
       overflow: "initial",
+      zIndex: 2,
     }
   }
 }
+
+const allowChange = key => (
+  key === "Backspace" ||
+  key === "Delete" ||
+  key.length === 1
+);
 
 class MultiColorInput extends Component {
 
@@ -23,15 +31,17 @@ class MultiColorInput extends Component {
   handleKeyDown = (event) => {
     this.props.onKeyDown(event);
     const { key, target } = event;
-    e.preventDefault();
-    if (key === "Backspace" || key === "Delete") {
-      this.valueHolder = mciFunctions.getAfterErase(event);
+    let newSelection = 0;
+    event.preventDefault();
+    if (allowChange(key)) {
       const selection = mciFunctions.getSelection(target);
-      this.props.onChange({ value: this.valueHolder, ...selection });
-    } else if (e.key.length === 1) {
-      this.valueHolder += e.key;
-
-      const selection = mciFunctions.getSelection(target);
+      if (key === "Backspace" || key === "Delete") {
+        this.valueHolder = mciFunctions.getAfterErase(this.valueHolder, selection);
+        newSelection = selection.selectionStart;
+      } else if (key.length === 1) {
+        this.valueHolder += key;
+        newSelection = selection.selectionStart + 1;
+      }
       this.props.onChange({ value: this.valueHolder, ...selection });
 
       const structure = this.props.createSegments(this.valueHolder)
@@ -39,7 +49,11 @@ class MultiColorInput extends Component {
       const elem = document.createElement('div');
       const JSX = (<InnerInput structure={structure} />);
 
-      ReactDOM.render(JSX, elem, () => { target.innerHTML = elem.innerHTML });
+      ReactDOM.render(JSX, elem, () => {
+        target.innerHTML = elem.innerHTML;
+        const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
+        mciFunctions.selectElementContents(target.children[elIndex],selectionIndex,selectionIndex );
+      });
     }
   }
 
@@ -54,7 +68,7 @@ class MultiColorInput extends Component {
   }
 
   render() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
       <div
         id={this.props.id}
@@ -69,10 +83,11 @@ class MultiColorInput extends Component {
         onMouseEnter={this.props.onMouseEnter}
         onPaste={this.props.onPaste}
         onCopy={this.props.onCopy}
-        >
-        <span style={{ color: "blue" }}>var</span>
+        ref={this.props.customRef}
+      >
+        {/* <span style={{ color: "blue" }}>var</span>
         <span>foo =</span>
-        <span style={{ color: "green" }}>"bar"</span>
+        <span style={{ color: "green", background: "#fff" }}>"bar"</span> */}
       </div>
     )
   }
@@ -98,7 +113,8 @@ MultiColorInput.propTypes = {
   onMouseEnter: PropTypes.func,
   onPaste: PropTypes.func,
   onCopy: PropTypes.func,
-  id: PropTypes.string
+  id: PropTypes.string,
+  customRef: PropTypes.object
 }
 
 MultiColorInput.defaultProps = {
@@ -111,8 +127,8 @@ MultiColorInput.defaultProps = {
   onMouseEnter: () => { },
   onPaste: () => { },
   onCopy: () => { },
-  id:"",
-  className:""
+  id: "",
+  className: ""
 }
 
 

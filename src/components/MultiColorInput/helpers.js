@@ -1,39 +1,66 @@
 const mciFunctions = {
   getSelection,
   getString,
-  getAfterErase
+  getAfterErase,
+  getSelectionElement,
+  selectElementContents
 }
 
 function getSelection(target) {
-  const range = window.getSelection().getRangeAt(0)
+  const range = window.getSelection().getRangeAt(0);
   const nodes = Array.prototype.slice.call(target.children);
   const startIndex = nodes.indexOf(range.startContainer.parentElement);
   const endIndex = nodes.indexOf(range.endContainer.parentElement);
+  if (startIndex === -1) {
+    return { startIndex, endIndex, selectionStart: 0, selectionEnd: 0 }
+  }
   const texts = nodes.map(node => node.textContent);
   let selectionStart = 0;
-  for (var i = 0; i < startIndex; i++) {
-    selectionStart += texts[i].length
-  }
-  selectionStart += range.startOffset;
-  let selectionEnd = texts[startIndex].length - range.startOffset;
-  for (var i = startIndex + 1; i < endIndex; i++) {
+  let selectionEnd = 0
+  for (var i = 0; i < endIndex; i++) {
+    if (i < startIndex) {
+      selectionStart += texts[i].length;
+    }
     selectionEnd += texts[i].length;
   }
-  selectionEnd += range.endOffset + selectionStart;
+  selectionStart += range.startOffset;
+  selectionEnd += range.endOffset;
 
   return { startIndex, endIndex, selectionStart, selectionEnd }
 }
 
+function getSelectionElement(target, selectionIndex) {
+  const nodes = Array.prototype.slice.call(target.children);
+  const texts = nodes.map(node => node.textContent);
+  let holder = 0;
+  console.log("holder", holder);
+  console.log("selectionIndex", selectionIndex);
+  for (var i = 0; i < texts.length; i++) {
+    if (holder + texts[i].length >= selectionIndex) {
+      return { elIndex: i, selectionIndex: selectionIndex - holder };
+    }
+    holder += texts[i].length;
+  }
+  
+}
+
+function selectElementContents(el,start,end) {
+  var range = document.createRange();
+  var sel = window.getSelection();
+  range.setStart(el,start);
+  range.setEnd(el,end);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
 function getString(target) {
   const nodes = Array.prototype.slice.call(target.children);
-  return nodes.reduce((res,item) => res+item.textContent,"");
+  return nodes.reduce((res, item) => res + item.textContent, "");
   // return nodes.map(node => node.textContent).join("");
 }
 
-function getAfterErase(event) {
-  const selection = getSelection(event.target);
-  const value = getString(event.target);
-  return value.slice(0,selection.selectionStart) + value.slice(selection.selectionEnd);
+function getAfterErase(value, selection) {
+  return value.slice(0, selection.selectionStart) + value.slice(selection.selectionEnd);
 }
 
 export { mciFunctions }

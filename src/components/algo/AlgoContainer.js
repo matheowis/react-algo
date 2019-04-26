@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
-import { numToLetters, OPERATORS } from "../../utils";
+import { numToLetters } from "../../utils";
+import {OPERATORS} from "../../constant";
 import { AlgoFunctions } from "../../functions/AlgoFunctions";
 import { CellSelections } from "../../functions/CellSelections";
 import { getCellsFromBox, getCellsFromBoxSpecial, splitCellName } from "../../functions/helpers";
+import {CELL_SIZE} from "../../constant";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
 import RightTools from "./RightTools";
 import Selectors from "./Selectors";
-import MultiColorInput from "../MultiColorInput";
 
 const styles = {
   root: {
@@ -34,20 +35,20 @@ const styles = {
     zIndex: 1000
   },
   topHeader: {
-    minWidth: 100,
+    minWidth: CELL_SIZE.X - 1,
     border: "solid",
     borderWidth: 1,
     borderRight: "none",
     borderBottom: "none",
     padding: "1px 0px",
-    background: "#ccc",
+    background: "#eee",
     borderColor: "#aaa",
     textAlign: "center"
   },
   side: {
     minWidth: 24,
     maxWidth: 24,
-    background: "#ccc",
+    background: "#eee",
     padding: 4,
     lineHeight: "",
     border: "solid",
@@ -178,7 +179,8 @@ class AlgoContainer extends Component {
         item.props.ref.current.blur();
         break;
       case "Escape":
-        item.props.ref.current.blur();
+      console.log("BLUR",item.props.ref.current);
+      item.props.ref.current.blur();
         this.cellSelections.ChangeSelection(0, "")
         break;
         case "Delete":{
@@ -321,8 +323,8 @@ class AlgoContainer extends Component {
   }
 
   handleChange = item => event => {
-    const selection = event.target.selectionStart;
-    const value = event.target.value;
+    const selection = event.selectionStart;
+    const value = event.value;
 
     // console.log("OPERATORS",OPERATORS);
     if (OPERATORS.includes(value[selection - 1])) {
@@ -333,6 +335,14 @@ class AlgoContainer extends Component {
     item.props.algorithm = value;
     item.props.handleChange(value);
     this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
+  }
+
+  createSegments = item => value => {
+    console.log("value",value);
+    const structure = [
+      {text:value, colorID:"B"}
+    ]
+    return structure;
   }
 
   render() {
@@ -367,6 +377,7 @@ class AlgoContainer extends Component {
                   onMouseEnter={this.handleMouseEnter}
                   onPaste={this.handlePaste}
                   onCopy={this.handleCopy}
+                  createSegments={this.createSegments}
                 />
               ))}
             </div>
