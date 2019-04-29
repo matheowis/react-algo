@@ -194,7 +194,7 @@ class AlgoContainer extends Component {
   handleMouseDown = item => event => {
     this.pMouse.start = this.pMouse.end = item.name;
     this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
-
+    console.log(item.name);
     console.log("Down", this.Algo.currentItem.props);
     if (this.Algo.currentItem.props) { // currently focused item
       const { props } = this.Algo.currentItem;
@@ -216,6 +216,7 @@ class AlgoContainer extends Component {
   }
 
   handleMouseLeftUp = item => {
+    console.log("Up", item.name)
     this.pMouse.start = this.pMouse.end = "";
 
   }
@@ -231,6 +232,7 @@ class AlgoContainer extends Component {
   }
 
   handlePaste = item => event => {
+    console.log("Paste!!!");
     var clipboardData, pastedData;
 
     // Stop data actually being pasted into div
@@ -323,18 +325,18 @@ class AlgoContainer extends Component {
   }
 
   handleChange = item => event => {
-    const selection = event.selectionStart;
-    const value = event.value;
+    // const selection = event.selectionStart;
+    // const value = event.value;
 
-    // console.log("OPERATORS",OPERATORS);
-    if (OPERATORS.includes(value[selection - 1])) {
-      this.Algo.selectedCell = null;
-    }
-    this.Algo.writing = value[0] === "=";
+    // // console.log("OPERATORS",OPERATORS);
+    // if (OPERATORS.includes(value[selection - 1])) {
+    //   this.Algo.selectedCell = null;
+    // }
+    // this.Algo.writing = value[0] === "=";
 
-    item.props.algorithm = value;
-    item.props.handleChange(value);
-    this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
+    // item.props.algorithm = value;
+    // item.props.handleChange(value);
+    // this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
   }
 
   createSegments = item => value => {

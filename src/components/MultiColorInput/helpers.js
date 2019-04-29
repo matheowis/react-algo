@@ -33,22 +33,20 @@ function getSelectionElement(target, selectionIndex) {
   const nodes = Array.prototype.slice.call(target.children);
   const texts = nodes.map(node => node.textContent);
   let holder = 0;
-  console.log("holder", holder);
-  console.log("selectionIndex", selectionIndex);
   for (var i = 0; i < texts.length; i++) {
     if (holder + texts[i].length >= selectionIndex) {
       return { elIndex: i, selectionIndex: selectionIndex - holder };
     }
     holder += texts[i].length;
   }
-  
 }
 
-function selectElementContents(el,start,end) {
+function selectElementContents(el, start, end) {
   var range = document.createRange();
   var sel = window.getSelection();
-  range.setStart(el,start);
-  range.setEnd(el,end);
+
+  range.setStart(el.firstChild, start);
+  range.setEnd(el.firstChild, end);
   sel.removeAllRanges();
   sel.addRange(range);
 }

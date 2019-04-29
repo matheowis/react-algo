@@ -43,21 +43,22 @@ class AlgoCell extends Component {
     selected: false
     // color: "rgb(238,255,0)"
   }
-  myRef = React.createRef();
+  // myRef = React.createRef();
   componentWillMount() {
-    this.props.item.props.handleInclude = this.handleInclude;
-    this.props.item.props.handleChange = this.handleChange;
-    this.props.item.props.ref = this.myRef;
+    // check if this.handleInclude isn't depricated
+    // this.props.item.props.handleInclude = this.handleInclude;
+    // this.props.item.props.handleChange = this.handleChange;
+    // this.props.item.props.ref = this.myRef;
   }
 
-  handleInclude = (color) => {
-    console.log("do Stuff", this);
-    this.setState(() => ({ color }));
-  }
+  // handleInclude = (color) => {
+  //   console.log("do Stuff", this);
+  //   this.setState(() => ({ color }));
+  // }
 
-  handleChange = (value) => {
-    this.setState(() => ({ value }));
-  }
+  // handleChange = (value) => {
+  //   this.setState(() => ({ value }));
+  // }
   render() {
     const { classes, item } = this.props;
     const { value } = this.state;
@@ -68,7 +69,7 @@ class AlgoCell extends Component {
         className={classes.bar}
         onBlur={this.props.onBlur(item)}
         onFocus={this.props.onFocus(item)}
-        onChange={this.props.onChange(item)}
+        // onChange={this.props.onChange(item)}
         createSegments={this.props.createSegments(item)}
         onKeyDown={this.props.onKeyDown(item)}
         onMouseDown={this.props.onMouseDown(item)}
@@ -76,7 +77,8 @@ class AlgoCell extends Component {
         onMouseEnter={this.props.onMouseEnter(item)}
         onPaste={this.props.onPaste(item)}
         onCopy={this.props.onCopy(item)}
-        customRef={this.myRef}
+        // customRef={this.myRef}
+        itemProps={this.props.item.props}
       />
         {/* {this.state.selected && <div className={classes.graber} />} */}
       </div>

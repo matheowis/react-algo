@@ -11,50 +11,107 @@ const styles = {
     whiteSpace: "nowrap",
     overflow: "hidden",
     "&:focus": {
-      position: "absolute",
+      // position: "absolute",
       overflow: "initial",
-      zIndex: 2,
+      zIndex: 3,
     }
   }
 }
 
-const allowChange = key => (
+const allowChange = (key, special) => (
   key === "Backspace" ||
   key === "Delete" ||
-  key.length === 1
+  key.length === 1 &&
+  !special.ctrl &&
+  !special.alt
 );
-
+const specialKeysSet = (holder, key, bool) => {
+  switch (key) {
+    case "Control": {
+      holder.ctrl = true;
+      break;
+    }
+    case "Alt": {
+      holder.alt = true;
+      break;
+    }
+  }
+}
 class MultiColorInput extends Component {
 
   valueHolder = "";
+  specialKeys = {
+    ctrl: false,
+    alt: false,
+  }
+  myRef = React.createRef();
+
+  componentWillMount() {
+    this.props.itemProps.handleChange = this.handleChange;
+    this.props.itemProps.ref = this.myRef;
+    this.props.itemProps.algorithm = "";
+    // this.props.item.props.handleInclude = this.handleInclude;
+    // this.props.item.props.handleChange = this.handleChange;
+    // this.props.item.props.ref = this.myRef;
+  }
 
   handleKeyDown = (event) => {
     this.props.onKeyDown(event);
     const { key, target } = event;
     let newSelection = 0;
-    event.preventDefault();
-    if (allowChange(key)) {
+    // switch(key)
+    specialKeysSet(this.specialKeys, key, true);
+    console.log(key);
+    console.log("KeyDown!");
+
+    if (allowChange(key, this.specialKeys)) {
+      event.preventDefault();
       const selection = mciFunctions.getSelection(target);
       if (key === "Backspace" || key === "Delete") {
+        selection.selectionStart -= 1;
+        // selection.selectionEnd -= 1;
         this.valueHolder = mciFunctions.getAfterErase(this.valueHolder, selection);
         newSelection = selection.selectionStart;
       } else if (key.length === 1) {
         this.valueHolder += key;
         newSelection = selection.selectionStart + 1;
       }
-      this.props.onChange({ value: this.valueHolder, ...selection });
 
-      const structure = this.props.createSegments(this.valueHolder)
+      const structure = this.props.createSegments(this.valueHolder);
+      this.props.itemProps.algorithm = this.valueHolder;
 
       const elem = document.createElement('div');
       const JSX = (<InnerInput structure={structure} />);
 
       ReactDOM.render(JSX, elem, () => {
         target.innerHTML = elem.innerHTML;
+        
+        console.log(elem.innerHTML);
         const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
-        mciFunctions.selectElementContents(target.children[elIndex],selectionIndex,selectionIndex );
+        mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
       });
     }
+  }
+
+  handleChange = value => {
+    console.log("change!");
+    const target = this.myRef.current;
+    const structure = this.props.createSegments(value);
+    this.props.itemProps.algorithm = value;
+
+    const elem = document.createElement('div');
+    const JSX = (<InnerInput structure={structure} />);
+
+    ReactDOM.render(JSX, elem, () => {
+      target.innerHTML = elem.innerHTML;
+      // const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
+      // mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
+    });
+  }
+
+  handleKeyUp = event => {
+    const { key } = event;
+    specialKeysSet(this.specialKeys, key, false);
   }
 
   handleBlure = event => {
@@ -76,6 +133,7 @@ class MultiColorInput extends Component {
         contentEditable
         suppressContentEditableWarning
         onKeyDown={this.handleKeyDown}
+        onKeyUp={this.handleKeyUp}
         onBlur={this.handleBlure}
         onFocus={this.handleFocus}
         onMouseDown={this.props.onMouseDown}
@@ -83,7 +141,7 @@ class MultiColorInput extends Component {
         onMouseEnter={this.props.onMouseEnter}
         onPaste={this.props.onPaste}
         onCopy={this.props.onCopy}
-        ref={this.props.customRef}
+        ref={this.myRef}
       >
         {/* <span style={{ color: "blue" }}>var</span>
         <span>foo =</span>
@@ -114,7 +172,8 @@ MultiColorInput.propTypes = {
   onPaste: PropTypes.func,
   onCopy: PropTypes.func,
   id: PropTypes.string,
-  customRef: PropTypes.object
+  itemProps: PropTypes.object.isRequired
+
 }
 
 MultiColorInput.defaultProps = {
