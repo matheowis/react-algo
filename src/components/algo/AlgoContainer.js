@@ -2,15 +2,16 @@ import React, { Component } from 'react';
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
 import { numToLetters } from "../../utils";
-import {OPERATORS} from "../../constant";
+import { OPERATORS } from "../../constant";
 import { AlgoFunctions } from "../../functions/AlgoFunctions";
 import { CellSelections } from "../../functions/CellSelections";
 import { getCellsFromBox, getCellsFromBoxSpecial, splitCellName } from "../../functions/helpers";
-import {CELL_SIZE} from "../../constant";
+import { CELL_SIZE } from "../../constant";
 import AlgoCell from "./AlgoCell";
 import AlgoHeader from "./AlgoHeader";
 import RightTools from "./RightTools";
 import Selectors from "./Selectors";
+import { mciFunctions } from '../MultiColorInput/helpers';
 
 const styles = {
   root: {
@@ -101,7 +102,7 @@ class AlgoContainer extends Component {
   cellSelections = new CellSelections(15);
   algoFunctions = new AlgoFunctions(this.gVariables);
   Algo = { writing: false, currentItem: {}, selectedCell: null }
- 
+
   firstCopy = true;
   textareaRef = React.createRef();
   componentWillMount() {
@@ -161,7 +162,7 @@ class AlgoContainer extends Component {
       }
     }
 
-    console.log({ key:event.key });
+    console.log({ key: event.key });
     switch (event.key) {
       case "ArrowDown":
         canMove && moveItem(0, -1);
@@ -179,40 +180,120 @@ class AlgoContainer extends Component {
         item.props.ref.current.blur();
         break;
       case "Escape":
-      console.log("BLUR",item.props.ref.current);
-      item.props.ref.current.blur();
+        console.log("BLUR", item.props.ref.current);
+        item.props.ref.current.blur();
         this.cellSelections.ChangeSelection(0, "")
         break;
-        case "Delete":{
-          this.handleDelete();
-        }
+      case "Delete": {
+        this.handleDelete();
+      }
     }
 
 
   }
 
+  // handleMouseDown = item => event => {
+  //   this.pMouse.start = this.pMouse.end = item.name;
+  //   if (!this.Algo.writing) {
+  //     this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
+  //   }
+  //   console.log(item.name);
+  //   console.log("Down", this.Algo.currentItem.props);
+  //   if (this.Algo.currentItem.props) { // currently focused item
+  //     const { props } = this.Algo.currentItem;
+  //     const { algorithm } = props;
+  //     if (this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name) {
+  //       event.preventDefault();
+  //       const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
+
+  //       if (this.Algo.selectedCell) {
+  //         // replace jest do wywalenia (brak możliwości powtarzania komorek)
+  //         props.algorithm = algorithm.replace(this.Algo.selectedCell, item.name);
+  //         this.Algo.selectedCell = item.name;
+  //         props.handleChange(props.algorithm,item.name.length - this.Algo.selectedCell.length);
+  //       } else if (OPERATORS.includes(algorithm[selection - 1])) {
+  //         this.Algo.selectedCell = item.name;
+  //         props.algorithm = algorithm.slice(0, selection) + item.name + algorithm.slice(selection, algorithm.length);
+  //         props.handleChange(props.algorithm, item.name.length);
+  //       }
+  //       // console.log("selection",selection);
+  //     }
+  //   }
+  // }
+
   handleMouseDown = item => event => {
     this.pMouse.start = this.pMouse.end = item.name;
-    this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
-    console.log(item.name);
-    console.log("Down", this.Algo.currentItem.props);
-    if (this.Algo.currentItem.props) { // currently focused item
-      const { props } = this.Algo.currentItem;
-      const { algorithm } = props;
-      if (this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name) {
-        event.preventDefault();
-        const selection = props.ref.current.selectionStart;
-        if (this.Algo.selectedCell) {
-          props.algorithm = algorithm.replace(this.Algo.selectedCell, item.name);
-          props.handleChange(props.algorithm);
-        } else if (OPERATORS.includes(algorithm[selection - 1])) {
-          this.Algo.selectedCell = item.name;
-          props.algorithm = algorithm.slice(0, selection) + item.name + algorithm.slice(selection, algorithm.length)
-          props.handleChange(props.algorithm);
+    if (!this.Algo.writing) {
+      this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
+    } else {
+      event.preventDefault();
+    }
+
+    this.handleSelection(item);
+
+  }
+
+  handleSelection = (item) => {
+    console.log({ name: item.name, start: this.pMouse.start });
+    if (item.name === this.pMouse.start) {
+      console.log("GVars=", this.gVariables.holder)
+      const startItem = this.gVariables.holder[this.pMouse.start];
+      const endItem = this.gVariables.holder[this.pMouse.end];
+      if (this.Algo.writing) {
+        const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
+        const parts = this.algoFunctions.splitAlgorithm(this.Algo.currentItem.props.algorithm);
+        const pIndex = mciFunctions.getCurrentPartIndex(parts, selection);
+        console.log("currentPart=", parts[pIndex]);
+        if (OPERATORS.includes(parts[pIndex])) {
+          if (startItem.name === endItem.name) {
+            // single
+            parts.splice(pIndex + 1, 0, startItem.name);
+          } else {
+            parts.splice(pIndex + 1, 0, startItem.name, ":", endItem.name)
+          }
+          this.Algo.currentItem.props.handleChange(parts.join(""), item.name.length);
+        } else if (parts[pIndex] === startItem.name || parts[pIndex] === endItem.name) {
+          // new group
+          if (parts[pIndex - 1] === ":") {
+            parts.splice(pIndex - 2, 3, startItem.name, ":", endItem.name);
+          } else if (parts[pIndex] === ":") {
+            parts.splice(pIndex - 1, 3, startItem.name, ":", endItem.name);
+          } else if (parts[pIndex + 1] === ":") {
+            parts.splice(pIndex, 3, startItem.name, ":", endItem.name);
+          } else {
+            // from single to group
+          }
+          this.Algo.currentItem.props.handleChange(parts.join(""), item.name.length);
+        } else{
+          // function?
         }
-        // console.log("selection",selection);
+        // if (OPERATORS.includes(algorithm[selection - 1])) {
+
+        // }
+
       }
     }
+    // if (this.Algo.currentItem.props) {
+    //   const { props } = this.Algo.currentItem;
+    //   const { algorithm } = props;
+    //   if (this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name) {
+    //     prevent();
+    //     const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
+    //     const parts = this.algoFunctions.splitAlgorithm(algorithm);
+    //     console.log("Show parts", parts);
+    //     if (OPERATORS.includes(algorithm[selection - 1])) {
+    //       this.Algo.selectedCell = item.name;
+    //       props.algorithm = algorithm.slice(0, selection) + item.name + algorithm.slice(selection, algorithm.length);
+    //       props.handleChange(props.algorithm, item.name.length);
+    //     } else if (this.Algo.selectedCell) {
+    //       // replace jest do wywalenia (brak możliwości powtarzania komorek)
+    //       props.algorithm = algorithm.replace(this.Algo.selectedCell, item.name);
+    //       this.Algo.selectedCell = item.name;
+    //       props.handleChange(props.algorithm, item.name.length - this.Algo.selectedCell.length);
+    //     }
+    //     // console.log("selection",selection);
+    //   }
+    // }
   }
 
   handleMouseLeftUp = item => {
@@ -299,9 +380,9 @@ class AlgoContainer extends Component {
   }
 
   handleDelete = () => {
-    const {start,end} = this.cellSelections.GetSelection(0);
-    const cellBox = getCellsFromBox(start,end);
-    for(var i =0;i< cellBox.length;i++){
+    const { start, end } = this.cellSelections.GetSelection(0);
+    const cellBox = getCellsFromBox(start, end);
+    for (var i = 0; i < cellBox.length; i++) {
       this.gVariables.holder[cellBox[i]].handleChange("");
     }
   }
@@ -325,24 +406,25 @@ class AlgoContainer extends Component {
   }
 
   handleChange = item => event => {
-    // const selection = event.selectionStart;
-    // const value = event.value;
+    // DO NOT USE item.props.handleChange(value), will couse recursion
+    console.log("OnChange item=", item);
+    const { value, selectionStart } = event;
 
-    // // console.log("OPERATORS",OPERATORS);
-    // if (OPERATORS.includes(value[selection - 1])) {
-    //   this.Algo.selectedCell = null;
-    // }
-    // this.Algo.writing = value[0] === "=";
+    // console.log("OPERATORS",OPERATORS);
+    if (OPERATORS.includes(value[selectionStart - 1])) {
+      this.Algo.selectedCell = null;
+    }
+    this.Algo.writing = value[0] === "=";
 
-    // item.props.algorithm = value;
+    item.props.algorithm = value;
     // item.props.handleChange(value);
-    // this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
+    this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
   }
 
   createSegments = item => value => {
-    console.log("value",value);
+    console.log("value", value);
     const structure = [
-      {text:value, colorID:"B"}
+      { text: value, colorID: "B" }
     ]
     return structure;
   }
@@ -352,7 +434,7 @@ class AlgoContainer extends Component {
     const { open, top, left } = this.state;
     return (
       <div className={classes.root}>
-      
+
         <textarea ref={this.textareaRef} className={classes.copyHolder} />
         <RightTools open={open} left={left} top={top} />
         <AlgoHeader active={this.gVariables.holder.active} />

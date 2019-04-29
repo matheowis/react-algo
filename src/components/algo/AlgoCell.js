@@ -69,7 +69,7 @@ class AlgoCell extends Component {
         className={classes.bar}
         onBlur={this.props.onBlur(item)}
         onFocus={this.props.onFocus(item)}
-        // onChange={this.props.onChange(item)}
+        onChange={this.props.onChange(item)}
         createSegments={this.props.createSegments(item)}
         onKeyDown={this.props.onKeyDown(item)}
         onMouseDown={this.props.onMouseDown(item)}

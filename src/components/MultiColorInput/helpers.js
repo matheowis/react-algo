@@ -3,7 +3,8 @@ const mciFunctions = {
   getString,
   getAfterErase,
   getSelectionElement,
-  selectElementContents
+  selectElementContents,
+  getCurrentPartIndex
 }
 
 function getSelection(target) {
@@ -27,6 +28,17 @@ function getSelection(target) {
   selectionEnd += range.endOffset;
 
   return { startIndex, endIndex, selectionStart, selectionEnd }
+}
+
+function getCurrentPartIndex(parts,startIndex) {
+  let partIndex = 0;
+  for(var i =0;i< parts.length;i++){
+    partIndex += parts[i].length;
+    if(partIndex >= startIndex){
+      return i;
+    }
+  }
+  return -1;
 }
 
 function getSelectionElement(target, selectionIndex) {

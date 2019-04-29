@@ -28,11 +28,11 @@ const allowChange = (key, special) => (
 const specialKeysSet = (holder, key, bool) => {
   switch (key) {
     case "Control": {
-      holder.ctrl = true;
+      holder.ctrl = bool;
       break;
     }
     case "Alt": {
-      holder.alt = true;
+      holder.alt = bool;
       break;
     }
   }
@@ -83,9 +83,11 @@ class MultiColorInput extends Component {
       const elem = document.createElement('div');
       const JSX = (<InnerInput structure={structure} />);
 
+      this.props.onChange({ value: this.valueHolder, selectionStart: selection.selectionStart });
+
       ReactDOM.render(JSX, elem, () => {
         target.innerHTML = elem.innerHTML;
-        
+
         console.log(elem.innerHTML);
         const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
         mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
@@ -93,19 +95,22 @@ class MultiColorInput extends Component {
     }
   }
 
-  handleChange = value => {
+  handleChange = (value, addLength) => {
     console.log("change!");
     const target = this.myRef.current;
     const structure = this.props.createSegments(value);
     this.props.itemProps.algorithm = value;
+    const selection = mciFunctions.getSelection(target);
+    const newSelection = selection.selectionStart + addLength;
+    this.valueHolder = value;
 
     const elem = document.createElement('div');
     const JSX = (<InnerInput structure={structure} />);
 
     ReactDOM.render(JSX, elem, () => {
       target.innerHTML = elem.innerHTML;
-      // const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
-      // mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
+      const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
+      mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
     });
   }
 
