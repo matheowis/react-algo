@@ -30,15 +30,15 @@ function getSelection(target) {
   return { startIndex, endIndex, selectionStart, selectionEnd }
 }
 
-function getCurrentPartIndex(parts,startIndex) {
+function getCurrentPartIndex(parts, startIndex) {
   let partIndex = 0;
-  for(var i =0;i< parts.length;i++){
+  for (var i = 0; i < parts.length; i++) {
     partIndex += parts[i].length;
-    if(partIndex >= startIndex){
-      return i;
+    if (partIndex >= startIndex) {
+      return { pIndex:i, pLength: partIndex - parts[i].length };
     }
   }
-  return -1;
+  return {pIndex:-1, pLength:0};
 }
 
 function getSelectionElement(target, selectionIndex) {

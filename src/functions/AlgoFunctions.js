@@ -134,12 +134,43 @@ class AlgoFunctions {
     return parts;
   }
 
+  partsToColorStructure = (parts) => {
+    const structure = []
+    let colorID = 1;
+
+    var i = 0;
+    while (i < parts.length) {
+      const last = structure[structure.length - 1]
+      if (this.gVariables.holder[parts[i]]) {
+        structure.push({ text: [parts[i]], colorID, start: parts[i], end: parts[i] });
+        colorID++;
+      } else if (parts[i] === ":") {
+        last.text.push(parts[i], parts[i + 1]);
+        last.end = parts[i + 1];
+        i++;
+      } else {
+        if (last && last.colorID === "B") {
+          last.text.push(parts[i]);
+        } else {
+          structure.push({ text: [parts[i]], colorID: "B" });
+        }
+      }
+      i++;
+    }
+
+    for (var i = 0; i < structure.length; i++) {
+      structure[i].text = structure[i].text.join("");
+    }
+
+    return structure;
+  }
+
   SelectionGroups = parts => {
     const newParts = []
     var i = 0;
     while (i < parts.length) {
       if (splitCellName(parts[i])) {
-        newParts.push({start: parts[i], end:parts[i]});
+        newParts.push({ start: parts[i], end: parts[i] });
       } else if (parts[i] === ":") {
         newParts[newParts.length - 1].end = parts[i + 1];
         i++;

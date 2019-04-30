@@ -95,13 +95,13 @@ class MultiColorInput extends Component {
     }
   }
 
-  handleChange = (value, addLength) => {
+  handleChange = (value, addLength, total = false) => {
     console.log("change!");
     const target = this.myRef.current;
     const structure = this.props.createSegments(value);
     this.props.itemProps.algorithm = value;
     const selection = mciFunctions.getSelection(target);
-    const newSelection = selection.selectionStart + addLength;
+    const newSelection = total ? addLength : selection.selectionStart + addLength;
     this.valueHolder = value;
 
     const elem = document.createElement('div');

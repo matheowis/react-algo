@@ -95,7 +95,9 @@ class AlgoContainer extends Component {
 
   pMouse = {
     start: "",
-    end: ""
+    end: "",
+    pStart: "",
+    pEnd: ""
   }
 
   mainHolderKeys = [];
@@ -178,11 +180,11 @@ class AlgoContainer extends Component {
         break;
       case "Enter":
         item.props.ref.current.blur();
+        this.cellSelections.clearSelection(true);
         break;
       case "Escape":
-        console.log("BLUR", item.props.ref.current);
         item.props.ref.current.blur();
-        this.cellSelections.ChangeSelection(0, "")
+        this.cellSelections.clearSelection();
         break;
       case "Delete": {
         this.handleDelete();
@@ -226,74 +228,84 @@ class AlgoContainer extends Component {
     if (!this.Algo.writing) {
       this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
     } else {
-      event.preventDefault();
+      if (item.name !== this.Algo.currentItem.props.name) {
+        event.preventDefault();
+        this.handleSelection(item);
+      }
     }
-
-    this.handleSelection(item);
-
   }
 
   handleSelection = (item) => {
-    console.log({ name: item.name, start: this.pMouse.start });
-    if (item.name === this.pMouse.start) {
-      console.log("GVars=", this.gVariables.holder)
-      const startItem = this.gVariables.holder[this.pMouse.start];
-      const endItem = this.gVariables.holder[this.pMouse.end];
-      if (this.Algo.writing) {
-        const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
-        const parts = this.algoFunctions.splitAlgorithm(this.Algo.currentItem.props.algorithm);
-        const pIndex = mciFunctions.getCurrentPartIndex(parts, selection);
-        console.log("currentPart=", parts[pIndex]);
-        if (OPERATORS.includes(parts[pIndex])) {
-          if (startItem.name === endItem.name) {
-            // single
-            parts.splice(pIndex + 1, 0, startItem.name);
-          } else {
-            parts.splice(pIndex + 1, 0, startItem.name, ":", endItem.name)
-          }
-          this.Algo.currentItem.props.handleChange(parts.join(""), item.name.length);
-        } else if (parts[pIndex] === startItem.name || parts[pIndex] === endItem.name) {
-          // new group
-          if (parts[pIndex - 1] === ":") {
-            parts.splice(pIndex - 2, 3, startItem.name, ":", endItem.name);
-          } else if (parts[pIndex] === ":") {
-            parts.splice(pIndex - 1, 3, startItem.name, ":", endItem.name);
-          } else if (parts[pIndex + 1] === ":") {
-            parts.splice(pIndex, 3, startItem.name, ":", endItem.name);
-          } else {
-            // from single to group
-          }
-          this.Algo.currentItem.props.handleChange(parts.join(""), item.name.length);
-        } else{
-          // function?
-        }
-        // if (OPERATORS.includes(algorithm[selection - 1])) {
-
-        // }
-
-      }
+    const startItem = this.gVariables.holder[this.pMouse.start];
+    const endItem = this.gVariables.holder[this.pMouse.end];
+    const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
+    const parts = this.algoFunctions.splitAlgorithm(this.Algo.currentItem.props.algorithm);
+    const {pIndex, pLength} = mciFunctions.getCurrentPartIndex(parts, selection);
+    // const indexLength = 
+    // let insertLength = 0;
+    let insertLength = pLength;
+    console.log("currentPart=", parts[pIndex]);
+    console.log("pIndex=", pIndex);
+    console.log("parts=", parts);
+    if (parts[pIndex].length >= 4) {
+      throw "Error parts[pIndex] is to long";
     }
-    // if (this.Algo.currentItem.props) {
-    //   const { props } = this.Algo.currentItem;
-    //   const { algorithm } = props;
-    //   if (this.Algo.writing && item !== this.Algo.currentItem && this.Algo.currentItem.name) {
-    //     prevent();
-    //     const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
-    //     const parts = this.algoFunctions.splitAlgorithm(algorithm);
-    //     console.log("Show parts", parts);
-    //     if (OPERATORS.includes(algorithm[selection - 1])) {
-    //       this.Algo.selectedCell = item.name;
-    //       props.algorithm = algorithm.slice(0, selection) + item.name + algorithm.slice(selection, algorithm.length);
-    //       props.handleChange(props.algorithm, item.name.length);
-    //     } else if (this.Algo.selectedCell) {
-    //       // replace jest do wywalenia (brak możliwości powtarzania komorek)
-    //       props.algorithm = algorithm.replace(this.Algo.selectedCell, item.name);
-    //       this.Algo.selectedCell = item.name;
-    //       props.handleChange(props.algorithm, item.name.length - this.Algo.selectedCell.length);
-    //     }
-    //     // console.log("selection",selection);
-    //   }
-    // }
+    if (OPERATORS.includes(parts[pIndex]) && parts[pIndex]!==":") {
+      console.log("is Operator")
+      if (startItem.name === endItem.name) {
+        // single
+        parts.splice(pIndex + 1, 0, startItem.name);
+        insertLength += startItem.name.length + 1;
+        console.log("SET END START", endItem.name)
+        Object.assign(this.pMouse, { pStart: startItem.name, pEnd: endItem.name });
+      } else {
+        //should never happen
+        parts.splice(pIndex + 1, 0, startItem.name, ":", endItem.name);
+        insertLength += 1 + startItem.name.length + endItem.name.length;
+        console.log("SET END", endItem.name)
+        Object.assign(this.pMouse, { pStart: startItem.name, pEnd: endItem.name });
+      }
+      this.Algo.currentItem.props.handleChange(parts.join(""), insertLength,true);
+    } else if (this.gVariables.holder[parts[pIndex]] || parts[pIndex] === ":") {
+      // new group
+      const { pStart, pEnd } = this.pMouse;
+      if (parts[pIndex - 1] === ":") {
+        console.log("Type_A");
+        parts.splice(pIndex - 2, 3, startItem.name, ":", endItem.name);
+        // const prevLength = pStart.length + 1 + pEnd.length;
+        // const newLength = startItem.name.length + 1 + endItem.name.length;
+        // insertLength = newLength - prevLength;
+        insertLength+=endItem.name.length;
+        Object.assign(this.pMouse, { pStart: startItem.name, pEnd: endItem.name });
+
+      } else if (parts[pIndex] === ":") {
+        //TOTEST
+        console.log("Type_B");
+        parts.splice(pIndex - 1, 3, startItem.name, ":", endItem.name);
+        // insertLength = 1 + startItem.name.length + endItem.name.length;//n
+        insertLength+=endItem.name.length + 1;
+
+      } else if (parts[pIndex + 1] === ":") {
+        //TOTEST
+        // what if parts[pIndex + 2] == undefined?
+        console.log("Type_C", startItem.name, ":", endItem.name);
+        parts.splice(pIndex, 3, startItem.name, ":", endItem.name);
+
+        // insertLength = startItem.name.length - pStart.length;
+        insertLength += startItem.name.length + endItem.name.length - parts[pIndex].length - parts[pIndex+2].length;
+        // insertLength = 1 + startItem.name.length + endItem.name.length;//n
+      } else {
+        //TOTEST
+        console.log("Type_D", parts[pIndex]);
+        parts.splice(pIndex, 1, startItem.name, ":", endItem.name);
+        insertLength +=startItem.name.length +  1 + endItem.name.length;//k
+        // from single to group
+      }
+      this.Algo.currentItem.props.handleChange(parts.join(""), insertLength,true);
+    } else {
+      // function?
+      console.log("Probably function")
+    }
   }
 
   handleMouseLeftUp = item => {
@@ -304,11 +316,14 @@ class AlgoContainer extends Component {
 
   handleMouseEnter = item => event => {
     if (this.pMouse.start !== "") {
+      console.log("MouseEnter");
       this.pMouse.end = item.name;
-      const { start, end } = this.pMouse
-      // this.cellFunctionHolder[0](start, end);
-      this.cellSelections.ChangeSelection(0, start, end)
-
+      if (!this.Algo.writing) {
+        const { start, end } = this.pMouse
+        // this.cellFunctionHolder[0](start, end);
+        this.cellSelections.ChangeSelection(0, start, end)
+      }
+      this.handleSelection(item);
     }
   }
 
@@ -422,10 +437,19 @@ class AlgoContainer extends Component {
   }
 
   createSegments = item => value => {
+
+    const parts = this.algoFunctions.splitAlgorithm(value);
+
+    const structure = this.algoFunctions.partsToColorStructure(parts);
+    const selections = structure.filter(s => s.colorID !== "B");
+    for (var i = 0; i < selections.length; i++) {
+      const { start, end, colorID } = selections[i];
+      this.cellSelections.ChangeSelection(colorID, start, end);
+    }
     console.log("value", value);
-    const structure = [
-      { text: value, colorID: "B" }
-    ]
+    // const structure = [
+    //   { text: value, colorID: "B" }
+    // ]
     return structure;
   }
 
