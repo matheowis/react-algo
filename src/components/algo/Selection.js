@@ -30,8 +30,8 @@ class Selection extends Component {
   getBoxPositionStyles = () => {
     const { start, end } = this.state;
     const valid = start !== "" && end !== "";
-    const startSplit = splitCellName(start);
-    const endSplit = splitCellName(end);
+    const startSplit = splitCellName(start) || 0;
+    const endSplit = splitCellName(end) || 0;
     const {X,Y} = CELL_SIZE;
     return valid ? {
       left: Math.min(startSplit.x, endSplit.x) * X + 33,

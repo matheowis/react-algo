@@ -20,7 +20,7 @@ const styles = {
       backgroundColor: "white"
     },
     // "&:focus":{
-    //   width:600,
+    //   width:100,
     //   zIndex:2,
     //   position:"absolute"
     // },

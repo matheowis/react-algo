@@ -3,13 +3,16 @@ import injectSheet from 'react-jss';
 import { COLORS_HEX } from "../../constant";
 
 const styles = COLORS_HEX.reduce((result, item, i) => {
-  result[`color${i}`] = { color: item, background: "#fff" }
+  result[`color${i}`] = {
+    color: item,
+    fontWeight: 600,
+  }
   return result;
 }, {});
 
-Object.assign(styles,{
-  colorB:{
-    color:"#222"
+Object.assign(styles, {
+  colorB: {
+    color: "#222"
   }
 });
 

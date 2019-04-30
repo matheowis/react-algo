@@ -56,7 +56,7 @@ function getSelectionElement(target, selectionIndex) {
 function selectElementContents(el, start, end) {
   var range = document.createRange();
   var sel = window.getSelection();
-
+  console.log("range",start,end);
   range.setStart(el.firstChild, start);
   range.setEnd(el.firstChild, end);
   sel.removeAllRanges();

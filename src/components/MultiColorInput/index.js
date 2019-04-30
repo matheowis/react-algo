@@ -14,6 +14,11 @@ const styles = {
       // position: "absolute",
       overflow: "initial",
       zIndex: 3,
+    },
+    "&:focus span": {
+      position:"relative",
+      zIndex:30,
+      backgroundColor: "#fff",
     }
   }
 }
@@ -110,6 +115,7 @@ class MultiColorInput extends Component {
     ReactDOM.render(JSX, elem, () => {
       target.innerHTML = elem.innerHTML;
       const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
+      console.log("SELECTION_INDEX",selectionIndex);
       mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
     });
   }
@@ -147,6 +153,7 @@ class MultiColorInput extends Component {
         onPaste={this.props.onPaste}
         onCopy={this.props.onCopy}
         ref={this.myRef}
+        spellCheck={false}
       >
         {/* <span style={{ color: "blue" }}>var</span>
         <span>foo =</span>
