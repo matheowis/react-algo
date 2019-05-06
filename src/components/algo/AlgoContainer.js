@@ -118,16 +118,26 @@ class AlgoContainer extends Component {
         this.mainHolderKeys[x].push({ name, props: obj });
       }
     }
-    this.gVariables.holder.active = { name: "", algorithm: "", outcome: "" }
+    this.gVariables.holder.active = { name: "header", algorithm: "", outcome: "", props: { algorithm: "", outcome: "" } }
+  }
+
+  componentDidMount() {
+    const newName = `A1`;
+    this.gVariables.holder.active.item = this.gVariables.holder[newName];
+    this.gVariables.holder[newName].ref.current.focus();
+    this.cellSelections.ChangeSelection(0, newName);
+
   }
 
   handleBlur = item => event => {
+    console.log("Blure", event);
     // const { algorithm } = item.props;
     // this.Algo.writing = false;
-    this.gVariables.holder.active.setName("");
-    this.gVariables.holder.active.setAlgorithm("");
-    this.gVariables.holder.active.item = null;
+    // this.gVariables.holder.active.setName("");
+    // this.gVariables.holder.active.setAlgorithm("");
+    // this.gVariables.holder.active.item = null;
 
+    this.cellSelections.clearSelection(true);
     this.calculateCell(item);
     // if (algorithm[0] === "=") {
     //   const outcome = this.algoFunctions.CalculateLocal(item);
@@ -137,30 +147,37 @@ class AlgoContainer extends Component {
     // }
   }
 
-  calculateCell = item =>{
+  calculateCell = item => {
     const { algorithm } = item.props;
     this.Algo.writing = false;
     if (algorithm[0] === "=") {
       const outcome = this.algoFunctions.CalculateLocal(item);
 
       item.props.outcome = outcome;
-      item.props.handleChange(outcome);
+      item.props.handleChange(outcome, undefined, false, true);
+      // item.props.handleChange(outcome);
     }
   }
 
   handleFocus = item => event => {
-    this.Algo.currentItem = item;
-    const { algorithm, outcome } = item.props;
-    // console.log("item.props", item.props);
-
-    if (outcome[0] !== "=" && algorithm[0] === "=") {
-      // console.log("switch!")
-      item.props.handleChange(algorithm);
+    if(item.name === 'header'){
+      this.cellSelections.ChangeSelection(0, item.item.name);
+    }else{
+      console.log(item.name);
+      this.Algo.currentItem = item;
+      const { algorithm, outcome } = item.props;
+      // console.log("item.props", item.props);
+  
+      if (outcome[0] !== "=" && algorithm[0] === "=") {
+        // console.log("switch!")
+        item.props.handleChange(algorithm);
+      }
+      // console.log("item", item)
+      console.log("Setting active item",item);
+      this.gVariables.holder.active.item = item.props;
+      this.gVariables.holder.active.setName(item.name);
+      this.gVariables.holder.active.setAlgorithm(algorithm);
     }
-    // console.log("item", item)
-    this.gVariables.holder.active.setName(item.name);
-    this.gVariables.holder.active.setAlgorithm(algorithm);
-    this.gVariables.holder.active.item = item;
   }
 
   handleKeyDown = item => event => {
@@ -191,10 +208,10 @@ class AlgoContainer extends Component {
         moveItem(-1, 0);
         break;
       case "Enter":
-      event.preventDefault();
+        event.preventDefault();
         this.calculateCell(item);
         this.cellSelections.clearSelection(true);
-        moveItem(0, -1,true);
+        moveItem(0, -1, true);
         break;
       case "Escape":
         item.props.ref.current.blur();
@@ -239,7 +256,7 @@ class AlgoContainer extends Component {
   // }
 
   handleMouseDown = item => event => {
-    console.log("handleMouseDown",item);
+    console.log("handleMouseDown", item);
     this.pMouse.start = this.pMouse.end = item.name;
     if (!this.Algo.writing) {
       this.cellSelections.ChangeSelection(0, this.pMouse.start, this.pMouse.end)
@@ -254,15 +271,18 @@ class AlgoContainer extends Component {
   handleSelection = (item) => {
     const startItem = this.gVariables.holder[this.pMouse.start];
     const endItem = this.gVariables.holder[this.pMouse.end];
-    const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
-    const parts = this.algoFunctions.splitAlgorithm(this.Algo.currentItem.props.algorithm);
+    const selection = mciFunctions.getSelection(this.gVariables.holder.active.props.ref.current).selectionStart
+    const parts = this.algoFunctions.splitAlgorithm(this.gVariables.holder.active.props.algorithm);
+    // const selection = mciFunctions.getSelection(this.Algo.currentItem.props.ref.current).selectionStart
+    // const parts = this.algoFunctions.splitAlgorithm(this.Algo.currentItem.props.algorithm);
     const { pIndex, pLength } = mciFunctions.getCurrentPartIndex(parts, selection);
     // const indexLength = 
     // let insertLength = 0;
     let insertLength = pLength;
     // console.log("currentPart=", parts[pIndex]);
     // console.log("pIndex=", pIndex);
-    // console.log("parts=", parts);
+    console.log(this.gVariables.holder.active.props.algorithm);
+    console.log("parts=", parts);
     if (parts[pIndex].length >= 4) {
       throw "Error parts[pIndex] is to long";
     }
@@ -282,7 +302,8 @@ class AlgoContainer extends Component {
         // console.log("SET END", endItem.name)
         Object.assign(this.pMouse, { pStart: startItem.name, pEnd: endItem.name });
       }
-      this.Algo.currentItem.props.handleChange(parts.join(""), insertLength, true);
+      // this.Algo.currentItem.props.handleChange(parts.join(""), insertLength, true);
+      this.gVariables.holder.active.props.handleChange(parts.join(""), insertLength, true);
     } else if (this.gVariables.holder[parts[pIndex]] || parts[pIndex] === ":") {
       // new group
       const { pStart, pEnd } = this.pMouse;
@@ -292,16 +313,6 @@ class AlgoContainer extends Component {
         parts.splice(pIndex - 2, 3, startItem.name, ":", endItem.name);
         insertLength += startItem.name.length + endItem.name.length;// - parts[pIndex].length
 
-        // const prevLength = pStart.length + 1 + pEnd.length;
-        // const newLength = startItem.name.length + 1 + endItem.name.length;
-        // insertLength = newLength - prevLength;
-        // console.log("insertLength_A1", insertLength)
-        
-        // console.log("parts[pIndex - 2]",parts[pIndex - 2]);
-        // console.log("startItem",startItem.name)
-        // console.log("endItem",endItem.name)
-        // insertLength += 2 * endItem.name.length + startItem.name.length - parts[pIndex - 2].length - parts[pIndex].length;// - parts[pIndex].length
-        // console.log("insertLength_A2", insertLength)
         Object.assign(this.pMouse, { pStart: startItem.name, pEnd: endItem.name });
 
       } else if (parts[pIndex] === ":") {
@@ -329,7 +340,8 @@ class AlgoContainer extends Component {
         insertLength += startItem.name.length + 1 + endItem.name.length;//k
         // from single to group
       }
-      this.Algo.currentItem.props.handleChange(parts.join(""), insertLength, true);
+      this.gVariables.holder.active.props.handleChange(parts.join(""), insertLength, true);
+      // this.Algo.currentItem.props.handleChange(parts.join(""), insertLength, true);
     } else {
       // function?
       // console.log("Probably function")
@@ -461,7 +473,7 @@ class AlgoContainer extends Component {
 
     item.props.algorithm = value;
     // item.props.handleChange(value);
-    this.gVariables.holder.active.setAlgorithm(item.props.algorithm);
+    // this.gVariables.holder.active.setAlgorithm(item.props.algorithm);// Recursion alert
   }
 
   createSegments = item => value => {
@@ -489,7 +501,20 @@ class AlgoContainer extends Component {
 
         <textarea ref={this.textareaRef} className={classes.copyHolder} />
         <RightTools open={open} left={left} top={top} />
-        <AlgoHeader active={this.gVariables.holder.active} />
+        <AlgoHeader
+          active={this.gVariables.holder.active}
+          // item={this.gVariables.holder.active}
+          onBlur={this.handleBlur}
+          onFocus={this.handleFocus}
+          onChange={this.handleChange}
+          onKeyDown={this.handleKeyDown}
+          onMouseDown={this.handleMouseDown}
+          onMouseUp={this.handleMouseUp}
+          onMouseEnter={this.handleMouseEnter}
+          onPaste={this.handlePaste}
+          onCopy={this.handleCopy}
+          createSegments={this.createSegments}
+        />
         <div className={classes.mainTable}>
           <div className={classes.letterHeader}>
             <div className={classes.side} />

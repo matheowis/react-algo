@@ -4,10 +4,12 @@ import InnerInput from "./InnerInput";
 import injectSheet from 'react-jss';
 import PropTypes from 'prop-types';
 import { mciFunctions } from "./helpers";
-import { CELL_SIZE } from "../../constant";
 const styles = {
   input: {
-    width: CELL_SIZE.X - 1,
+    width: '70vw',
+    height: 21,
+    border: 'solid',
+    borderWidth: 1,
     whiteSpace: "nowrap",
     overflow: "hidden",
     "&:focus": {
@@ -15,11 +17,11 @@ const styles = {
       overflow: "initial",
       zIndex: 3,
     },
-    "&:focus span": {
-      position: "relative",
-      zIndex: 30,
-      backgroundColor: "#fff",
-    }
+    // "&:focus span": {
+    //   position: "relative",
+    //   zIndex: 30,
+    //   backgroundColor: "#fff",
+    // }
   }
 }
 
@@ -52,10 +54,12 @@ class MultiColorInput extends Component {
   myRef = React.createRef();
 
   componentWillMount() {
-    this.props.itemProps.handleChange = this.handleChange;
-    this.props.itemProps.handleChangeSimple = this.handleChangeSimple;
-    this.props.itemProps.ref = this.myRef;
-    this.props.itemProps.algorithm = "";
+    console.log("Header props", this.props);
+    this.props.active.props.handleChange = this.handleChange;
+    this.props.active.props.ref = this.myRef;
+    // this.props.itemProps.handleChange = this.handleChange;
+    // this.props.itemProps.ref = this.myRef;
+    // this.props.itemProps.algorithm = "";
     // this.props.item.props.handleInclude = this.handleInclude;
     // this.props.item.props.handleChange = this.handleChange;
     // this.props.item.props.ref = this.myRef;
@@ -73,13 +77,11 @@ class MultiColorInput extends Component {
     if (allowChange(key, this.specialKeys)) {
       event.preventDefault();
       const selection = mciFunctions.getSelection(target);
-      if (key === "Backspace" || key === "Delete") {
-        // selection.selectionStart -= 1;
+      if (key === "Backspace" || key === "Delete") {//
         if (selection.selectionStart !== selection.selectionEnd) {
           selection.selectionStart++;
         }
         selection.selectionStart -= selection.selectionStart ? 1 : 0;
-        // selection.selectionEnd -= 1;
         this.valueHolder = mciFunctions.getAfterErase(this.valueHolder, selection);
         newSelection = selection.selectionStart;
       } else if (key.length === 1) {
@@ -88,7 +90,9 @@ class MultiColorInput extends Component {
       }
 
       const structure = this.props.createSegments(this.valueHolder);
-      this.props.itemProps.algorithm = this.valueHolder;
+      this.props.active.props.algorithm = this.valueHolder;
+
+      this.props.active.item.handleChangeSimple(this.valueHolder);
 
       const elem = document.createElement('div');
       const JSX = (<InnerInput structure={structure} />);
@@ -97,10 +101,11 @@ class MultiColorInput extends Component {
 
       ReactDOM.render(JSX, elem, () => {
         target.innerHTML = elem.innerHTML;
-        if(target.children.length){
+        if (target.children.length) {
           console.log("After Key Down", key);
           console.log(elem.innerHTML);
           const { elIndex, selectionIndex } = mciFunctions.getSelectionElement(target, newSelection);
+          console.log("target.children", target.children);
           mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
         }
       });
@@ -108,10 +113,14 @@ class MultiColorInput extends Component {
   }
 
   handleChange = (value, addLength, total, prevAlgorithm) => {
-    console.log("change!");
+    console.log("changeHeader!");
     if (!prevAlgorithm) {
-      this.props.itemProps.algorithm = value;
+      this.props.active.props.algorithm = value;
     }
+    // recursion error
+    // this.props.active.item.handleChange(value);// no selection
+    this.props.active.item.handleChangeSimple(this.valueHolder);
+
     const target = this.myRef.current;
     const structure = this.props.createSegments(value);
     const selection = mciFunctions.getSelection(target);
@@ -125,22 +134,10 @@ class MultiColorInput extends Component {
       target.innerHTML = elem.innerHTML;
       if (!prevAlgorithm) {
         const selectionObj = mciFunctions.getSelectionElement(target, newSelection);
-        console.log("selectionObj", selectionObj);
+        // console.log("selectionObj", selectionObj);
         const { elIndex, selectionIndex } = selectionObj;
         mciFunctions.selectElementContents(target.children[elIndex], selectionIndex, selectionIndex);
       }
-    });
-  }
-
-  handleChangeSimple = (value) => {
-    const target = this.myRef.current;
-    const structure = this.props.createSegments(value);
-    this.props.itemProps.algorithm = value;
-    this.valueHolder = value;
-    const elem = document.createElement('div');
-    const JSX = (<InnerInput structure={structure} />);
-    ReactDOM.render(JSX, elem, () => {
-      target.innerHTML = elem.innerHTML;
     });
   }
 
@@ -208,8 +205,9 @@ MultiColorInput.propTypes = {
   onPaste: PropTypes.func,
   onCopy: PropTypes.func,
   id: PropTypes.string,
-  itemProps: PropTypes.object.isRequired
-
+  active: PropTypes.object.isRequired,
+  // itemProps: PropTypes.object.isRequired,
+  // childCell: PropTypes.object.isRequired,
 }
 
 MultiColorInput.defaultProps = {

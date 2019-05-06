@@ -51,6 +51,7 @@ function getSelectionElement(target, selectionIndex) {
     }
     holder += texts[i].length;
   }
+  return {elIndex:0,selectionIndex:0}
 }
 
 function selectElementContents(el, start, end) {
