@@ -78,6 +78,7 @@ class AlgoCell extends Component {
         onPaste={this.props.onPaste(item)}
         onCopy={this.props.onCopy(item)}
         // customRef={this.myRef}
+        active={this.props.active}
         itemProps={this.props.item.props}
       />
         {/* {this.state.selected && <div className={classes.graber} />} */}
@@ -88,6 +89,7 @@ class AlgoCell extends Component {
 
 AlgoCell.propTypes = {
   item: PropTypes.object.isRequired,
+  active:PropTypes.object.isRequired,
   onBlur: PropTypes.func.isRequired,
   onFocus: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,

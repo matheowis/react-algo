@@ -56,6 +56,7 @@ class MultiColorInput extends Component {
   componentWillMount() {
     console.log("Header props", this.props);
     this.props.active.props.handleChange = this.handleChange;
+    this.props.active.props.handleChangeSimple = this.handleChangeSimple;
     this.props.active.props.ref = this.myRef;
     // this.props.itemProps.handleChange = this.handleChange;
     // this.props.itemProps.ref = this.myRef;
@@ -141,6 +142,18 @@ class MultiColorInput extends Component {
     });
   }
 
+  handleChangeSimple = (value) => {
+    const target = this.myRef.current;
+    const structure = this.props.createSegments(value);
+    this.props.active.props.algorithm = value;
+    this.valueHolder = value;
+    const elem = document.createElement('div');
+    const JSX = (<InnerInput structure={structure} />);
+    ReactDOM.render(JSX, elem, () => {
+      target.innerHTML = elem.innerHTML;
+    });
+  }
+
   handleKeyUp = event => {
     const { key } = event;
     specialKeysSet(this.specialKeys, key, false);
@@ -154,6 +167,7 @@ class MultiColorInput extends Component {
   handleFocus = event => {
     this.valueHolder = mciFunctions.getString(event.target);
     this.props.onFocus(event);
+    console.log("inner focus", this.props.active.item.algorithm)
   }
 
   render() {

@@ -90,6 +90,8 @@ class MultiColorInput extends Component {
       const structure = this.props.createSegments(this.valueHolder);
       this.props.itemProps.algorithm = this.valueHolder;
 
+      this.props.active.props.handleChangeSimple(this.valueHolder);
+
       const elem = document.createElement('div');
       const JSX = (<InnerInput structure={structure} />);
 
@@ -118,6 +120,8 @@ class MultiColorInput extends Component {
     const newSelection = total ? addLength : selection.selectionStart + addLength;
     this.valueHolder = value;
 
+    this.props.active.props.handleChangeSimple(this.valueHolder);
+
     const elem = document.createElement('div');
     const JSX = (<InnerInput structure={structure} />);
 
@@ -132,9 +136,11 @@ class MultiColorInput extends Component {
     });
   }
 
-  handleChangeSimple = (value) => {
+  handleChangeSimple = (value,prevAlgorithm) => {
     const target = this.myRef.current;
     const structure = this.props.createSegments(value);
+    // if(prevAlgorithm){
+    // }
     this.props.itemProps.algorithm = value;
     this.valueHolder = value;
     const elem = document.createElement('div');
@@ -157,6 +163,7 @@ class MultiColorInput extends Component {
   handleFocus = event => {
     this.valueHolder = mciFunctions.getString(event.target);
     this.props.onFocus(event);
+    console.log("inner focus", this.props.active.item.algorithm)
   }
 
   render() {

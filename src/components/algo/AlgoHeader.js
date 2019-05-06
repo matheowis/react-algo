@@ -31,10 +31,9 @@ class AlgoHeader extends Component {
   }
 
   setAlgorithm = (algorithm) => {
-    // this.setState(() => ({ algorithm }));
-    console.log(this.props.active)
-    // to przez ta funkcje, blure moze wynikac z set selection, tak jest
-    this.props.active.props.handleChange(algorithm,0,false,true);
+    // this.props.active.props.handleChange(algorithm,0,false,true);
+    // this.props.active.props.handleChange("",0,false,true);
+    this.props.active.props.handleChangeSimple(algorithm);
   }
 
   render() {
