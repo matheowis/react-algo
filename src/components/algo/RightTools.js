@@ -8,7 +8,7 @@ const styles = {
     position: "fixed",
     boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)",
     overflow: "hidden",
-    zIndex: 10,
+    zIndex: 1000,
     background: "#fff"
   },
   button: {

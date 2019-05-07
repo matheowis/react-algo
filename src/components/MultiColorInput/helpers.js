@@ -55,6 +55,10 @@ function getSelectionElement(target, selectionIndex) {
 }
 
 function selectElementContents(el, start, end) {
+  if(!el){
+    console.log("WARNING el in selectElementContents is undefined");
+    return;
+  }
   var range = document.createRange();
   var sel = window.getSelection();
   console.log("range",start,end);

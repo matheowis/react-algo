@@ -33,17 +33,67 @@ class AlgoFunctions {
   getBaseFunctions = () => {
     return ALGO_FUNCTIONS(this.gVariables);
   }
+  recalculationStack = {}
+  RecalculateParents = (cell,stack) => {
+    if(!stack){
+      this.recalculationStack = {};
+    }
+    // const { algorithm } = cell.props;
+    // const parts = this.Generate(algorithm, cell.name);
+    const allParents = Object.keys(cell.props.parents);
+    console.log("Parents", cell.props);
+    console.log({allParents});
+    for(var i =0;i< allParents.length;i++){
+      const parent = this.gVariables.holder[allParents[i]];
+      if(parent){
+        console.log("parent",parent )
+        if(parent.children.includes(cell.props.name)){
+          if(this.recalculationStack[parent.name]){
+            continue;
+          }else{
+            const outcome = this.CalculateLocal({props:parent});
+            parent.outcome = outcome;
+            this.recalculationStack[parent.name] = outcome;
+            console.log("RecalculateParents, outcome=",outcome);
+            parent.handleChange(outcome, undefined, false, true);
+            this.RecalculateParents({props:parent});
+          }
+        }else{
+          delete cell.props.parents[cell.name];
+        }
+      }
+      // const childCell = this.gVariables.holder[parts[i]];
+      // if(childCell){
+      //   if(cell.props.children.includes(cell.name)){
+      //     childCell.parents[cell.name] = 1
+      //   }else{
+      //     delete childCell.parents[cell.name]
+      //   }
+      // }
+    }
+  }
   // 1
   CalculateLocal = (cell) => {
     // local value calculations for cell
     // You can refresh cells here via STATE REFERANCE
     const { algorithm } = cell.props;
     const parts = this.Generate(algorithm, cell.name);
-    // console.log({ parts })
-    // console.log("gVariables",this.gVariables);
+
+    cell.props.children = [];
+    for(var i =0;i< parts.length;i++){
+      const childCell = this.gVariables.holder[parts[i]];
+      if(childCell){
+        cell.props.children.push(parts[i]);
+        childCell.parents[cell.props.name] = 1;
+      }
+    }
+    
+    console.log("CalculateLocal Parts=",parts);
+    console.log("gVariables",this.gVariables);
     const flatted = this.flatAlgorithm(parts);
     const flatAlgo = flatted.join("");
     console.log({ flatted })
+
     return eval(flatAlgo).toString();
   }
   // 2?
@@ -56,6 +106,8 @@ class AlgoFunctions {
     // fill sheet based on this.gVariables
     // You can refresh cells here via STATE REFERANCE
   }
+
+
 
   Generate(rawAlgorithm, name, stack) {
     if (rawAlgorithm[0] !== "=" && !isNaN(rawAlgorithm)) {
@@ -77,7 +129,8 @@ class AlgoFunctions {
         i += this.funcs[parts[i]].skip;
         continue;
       }
-      if (this.gVariables.holder[parts[i]] && !this.gVariables.functionCells[parts[i]]) {
+      if (this.gVariables.holder[parts[i]]) {
+      // if (this.gVariables.holder[parts[i]] && !this.gVariables.functionCells[parts[i]]) {
         const { algorithm } = this.gVariables.holder[parts[i]];
         const { canCalc, result } = this.isCalculable(algorithm);
         if (canCalc) {
@@ -88,7 +141,7 @@ class AlgoFunctions {
       }
       i++;
     }
-    if (!stack) {
+    if (!stack && name) {
       this.gVariables.functionCells[name] = parts;
     }
     return parts;
@@ -191,6 +244,7 @@ class AlgoFunctions {
         newParts.push(...this.flatAlgorithm(functionCells[part]));
       } else if (this.funcs[part]) {
         // Function
+        // console.log({funcs:this.funcs});
         const funParts = this.funcs[part].count(outerParts, i);
         funParts.forEach(funPart => {
           if (functionCells[funPart]) {

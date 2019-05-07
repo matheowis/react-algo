@@ -113,7 +113,7 @@ class AlgoContainer extends Component {
       this.mainHolderKeys[x] = [];
       for (var y = 0; y < columns; y++) {
         const name = `${numToLetters(y)}${x + 1}`;
-        const obj = { algorithm: "", outcome: "", isOver: false, name, x, y };
+        const obj = { algorithm: "", outcome: "", isOver: false, name, x, y, children: [], parents: {} };
         this.gVariables.holder[name] = obj;
         this.mainHolderKeys[x].push({ name, props: obj });
       }
@@ -136,7 +136,6 @@ class AlgoContainer extends Component {
     // this.gVariables.holder.active.setName("");
     // this.gVariables.holder.active.setAlgorithm("");
     // this.gVariables.holder.active.item = null;
-
     this.cellSelections.clearSelection(true);
     this.calculateCell(item);
     // if (algorithm[0] === "=") {
@@ -154,7 +153,9 @@ class AlgoContainer extends Component {
       const outcome = this.algoFunctions.CalculateLocal(item);
       item.props.outcome = outcome;
       item.props.handleChange(outcome, undefined, false, true);
+      // this.algoFunctions.SetParents(item);
     }
+    this.algoFunctions.RecalculateParents(item);
   }
 
   handleFocus = item => event => {
@@ -165,6 +166,7 @@ class AlgoContainer extends Component {
       this.gVariables.holder.active.props.algorithm = "";
       this.Algo.currentItem = item;
       const { algorithm, outcome } = item.props;
+      this.Algo.writing = algorithm[0] === "=";
       // console.log("item.props", item.props);
 
       if (outcome[0] !== "=" && algorithm[0] === "=") {
@@ -256,7 +258,11 @@ class AlgoContainer extends Component {
   // }
 
   handleMouseDown = item => event => {
+    console.log("Mouse Button=", event.button);
     console.log("handleMouseDown", item);
+    if (event.button === 2) {
+      return;
+    }
     this.pMouse.start = this.pMouse.end = item.name;
     if (item.name === 'header') {
       return;
@@ -297,8 +303,13 @@ class AlgoContainer extends Component {
     let insertLength = pLength;
     // console.log("currentPart=", parts[pIndex]);
     // console.log("pIndex=", pIndex);
-    console.log(this.gVariables.holder.active.props.algorithm);
-    console.log("parts=", parts);
+    // console.log(this.gVariables.holder.active.props.algorithm);
+    // console.log("parts=", parts);
+
+    if (parts.length === 0) {
+      return;
+    }
+
     if (parts[pIndex].length >= 4) {
       throw "Error parts[pIndex] is to long";
     }
@@ -463,7 +474,15 @@ class AlgoContainer extends Component {
     const { start, end } = this.cellSelections.GetSelection(0);
     const cellBox = getCellsFromBox(start, end);
     for (var i = 0; i < cellBox.length; i++) {
-      this.gVariables.holder[cellBox[i]].handleChange("");
+      const cell = this.gVariables.holder[cellBox[i]];
+      delete this.gVariables.functionCells[cellBox[i]];
+      const parents = Object.keys(cell.parents);
+      // cell.handleChange("", undefined);
+      cell.handleChangeSimple("");
+      if (parents.length) {
+        console.log("RECALCULATING!!!", cell);
+        this.algoFunctions.RecalculateParents({ props: cell });
+      }
     }
   }
 
@@ -518,6 +537,14 @@ class AlgoContainer extends Component {
     return structure;
   }
 
+  handleAddData = () => {
+
+  }
+
+  handleSetFinal = () => {
+
+  }
+
   render() {
     const { classes } = this.props;
     const { open, top, left } = this.state;
@@ -525,7 +552,13 @@ class AlgoContainer extends Component {
       <div className={classes.root}>
 
         <textarea ref={this.textareaRef} className={classes.copyHolder} />
-        <RightTools open={open} left={left} top={top} />
+        <RightTools
+          open={open}
+          left={left}
+          top={top}
+          onAddData={this.handleAddData}
+          onSetFinal={this.handleSetFinal}
+        />
         <AlgoHeader
           active={this.gVariables.holder.active}
           // item={this.gVariables.holder.active}
