@@ -283,7 +283,6 @@ class AlgoContainer extends Component {
     }
     const startItem = this.gVariables.holder[this.pMouse.start];
     const endItem = this.gVariables.holder[this.pMouse.end];
-    console.dir(this.gVariables.holder.active.props.ref.current);
     const isHeader = document.activeElement === this.gVariables.holder.active.props.ref.current;
     const selection = isHeader ?
       mciFunctions.getSelection(this.gVariables.holder.active.props.ref.current).selectionStart :
@@ -331,21 +330,24 @@ class AlgoContainer extends Component {
       }
       if (isHeader) {
         this.gVariables.holder.active.props.handleChange(parts.join(""), insertLength, true);
+        this.gVariables.holder.active.item.handleChangeSimple(parts.join(""));
       } else {
         this.gVariables.holder.active.item.handleChange(parts.join(""), insertLength, true);
       }
       // this.Algo.currentItem.props.handleChange(parts.join(""), insertLength, true);
     } else if (this.gVariables.holder[parts[pIndex]] || parts[pIndex] === ":") {
       // new group
-      const { pStart, pEnd } = this.pMouse;
-      if (parts[pIndex - 1] === ":") {
+      // const { pStart, pEnd } = this.pMouse;
+      // console.log("ched parts", { b: parts[pIndex - 1], c: parts[pIndex], f: parts[pIndex + 1] });
+      if (parts[pIndex - 1] !== ":" && parts[pIndex + 1] !== ":" && startItem.name === endItem.name) {
+        parts.splice(pIndex, 1, startItem.name);
+        insertLength += startItem.name.length;
+      } else if (parts[pIndex - 1] === ":") {
         // console.log("Type_A", parts[pIndex]);
         insertLength -= parts[pIndex - 2].length;
         parts.splice(pIndex - 2, 3, startItem.name, ":", endItem.name);
         insertLength += startItem.name.length + endItem.name.length;// - parts[pIndex].length
-
         Object.assign(this.pMouse, { pStart: startItem.name, pEnd: endItem.name });
-
       } else if (parts[pIndex] === ":") {
         //TOTEST
         console.log("Type_B", parts[pIndex]);
@@ -374,6 +376,7 @@ class AlgoContainer extends Component {
 
       if (isHeader) {
         this.gVariables.holder.active.props.handleChange(parts.join(""), insertLength, true);
+        this.gVariables.holder.active.item.handleChangeSimple(parts.join(""));
       } else {
         this.gVariables.holder.active.item.handleChange(parts.join(""), insertLength, true);
       }
@@ -385,9 +388,8 @@ class AlgoContainer extends Component {
   }
 
   handleMouseLeftUp = item => {
-    console.log("Up", item.name)
+    // console.log("Up", item.name)
     this.pMouse.start = this.pMouse.end = "";
-
   }
 
   handleMouseEnter = item => event => {

@@ -83,7 +83,8 @@ class MultiColorInput extends Component {
         this.valueHolder = mciFunctions.getAfterErase(this.valueHolder, selection);
         newSelection = selection.selectionStart;
       } else if (key.length === 1) {
-        this.valueHolder += key;
+        // this.valueHolder += key;
+        this.valueHolder = this.valueHolder.slice(0,selection.selectionStart) + key + this.valueHolder.slice(selection.selectionEnd);
         newSelection = selection.selectionStart + 1;
       }
 

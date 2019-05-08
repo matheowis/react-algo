@@ -38,6 +38,10 @@ class AlgoFunctions {
     if(!stack){
       this.recalculationStack = {};
     }
+    if(!cell.props.parents){
+      console.log("UNDEFINED PARENTS IN RECALCULATION", cell.props);
+      return;
+    }
     // const { algorithm } = cell.props;
     // const parts = this.Generate(algorithm, cell.name);
     const allParents = Object.keys(cell.props.parents);
