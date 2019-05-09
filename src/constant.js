@@ -1,4 +1,5 @@
-export const OPERATORS = ['=', ';', '/', '*', '-', '+','(',':',')','?'];
+// export const OPERATORS = ['=', ';', '/', '*', '-', '+','(',':',')','?'];
+export const OPERATORS = ['=', ';', '/', '*', '-', '+','(',':','?'];
 
 export const COLORS_HEX = [
   "#43bc9d",

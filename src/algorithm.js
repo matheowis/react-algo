@@ -25,6 +25,7 @@ function Generate(rawAlgorithm, container) {
     const isCellID = isBetween(clearAlgo.charCodeAt(i), [48, 65], [57, 90], true);
     const isDot = clearAlgo[i] === "." || clearAlgo[i] === ",";
     const isLast = i === clearAlgo.length - 1;
+    
     if ((isCellID || isDot) && !isLast) {// stringHolder !== "" &&
       if (stringHolder === "" && stringPart !== "") {
         parts.push(stringPart);

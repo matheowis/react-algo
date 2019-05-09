@@ -126,6 +126,13 @@ export function splitCellName(name) {
   y = parseFloat(y);
   return { x, y };
 }
+
+export function CreateCellName(x,y){
+  return `${numToLetters(x)}${y}`;
+  
+}
+
+
 function splitCellName2(name) {
   let x = "";
   let y = "";

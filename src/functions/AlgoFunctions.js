@@ -34,11 +34,11 @@ class AlgoFunctions {
     return ALGO_FUNCTIONS(this.gVariables);
   }
   recalculationStack = {}
-  RecalculateParents = (cell,stack) => {
-    if(!stack){
+  RecalculateParents = (cell, stack) => {
+    if (!stack) {
       this.recalculationStack = {};
     }
-    if(!cell.props.parents){
+    if (!cell.props.parents) {
       console.log("UNDEFINED PARENTS IN RECALCULATION", cell.props);
       return;
     }
@@ -46,23 +46,23 @@ class AlgoFunctions {
     // const parts = this.Generate(algorithm, cell.name);
     const allParents = Object.keys(cell.props.parents);
     console.log("Parents", cell.props);
-    console.log({allParents});
-    for(var i =0;i< allParents.length;i++){
+    console.log({ allParents });
+    for (var i = 0; i < allParents.length; i++) {
       const parent = this.gVariables.holder[allParents[i]];
-      if(parent){
-        console.log("parent",parent )
-        if(parent.children.includes(cell.props.name)){
-          if(this.recalculationStack[parent.name]){
+      if (parent) {
+        console.log("parent", parent)
+        if (parent.children.includes(cell.props.name)) {
+          if (this.recalculationStack[parent.name]) {
             continue;
-          }else{
-            const outcome = this.CalculateLocal({props:parent});
+          } else {
+            const outcome = this.CalculateLocal({ props: parent });
             parent.outcome = outcome;
             this.recalculationStack[parent.name] = outcome;
-            console.log("RecalculateParents, outcome=",outcome);
+            console.log("RecalculateParents, outcome=", outcome);
             parent.handleChange(outcome, undefined, false, true);
-            this.RecalculateParents({props:parent});
+            this.RecalculateParents({ props: parent });
           }
-        }else{
+        } else {
           delete cell.props.parents[cell.name];
         }
       }
@@ -84,21 +84,20 @@ class AlgoFunctions {
     const parts = this.Generate(algorithm, cell.name);
 
     cell.props.children = [];
-    for(var i =0;i< parts.length;i++){
+    for (var i = 0; i < parts.length; i++) {
       const childCell = this.gVariables.holder[parts[i]];
-      if(childCell){
+      if (childCell) {
         cell.props.children.push(parts[i]);
         childCell.parents[cell.props.name] = 1;
       }
     }
-    
-    console.log("CalculateLocal Parts=",parts);
-    console.log("gVariables",this.gVariables);
+
+    console.log("CalculateLocal Parts=", parts);
+    console.log("gVariables", this.gVariables);
     const flatted = this.flatAlgorithm(parts);
     const flatAlgo = flatted.join("");
     console.log({ flatted })
-
-    return eval(flatAlgo).toString();
+    return eval(flatAlgo).toFixed(2);
   }
   // 2?
   Calculate = () => {
@@ -126,15 +125,19 @@ class AlgoFunctions {
     while (i < parts.length) {
       if (this.funcs[parts[i]]) {
         const functionCells = this.funcs[parts[i]].spread(parts, i);
+
         functionCells.forEach(element => {
           const { algorithm } = this.gVariables.holder[element];
-          this.gVariables.functionCells[element] = this.Generate(algorithm, this.gVariables.holder)
+          const result = this.Generate(algorithm, this.gVariables.holder);
+          // filter out "" from functionCells at the end
+          this.gVariables.functionCells[element] = result;
+
         });
         i += this.funcs[parts[i]].skip;
         continue;
       }
       if (this.gVariables.holder[parts[i]]) {
-      // if (this.gVariables.holder[parts[i]] && !this.gVariables.functionCells[parts[i]]) {
+        // if (this.gVariables.holder[parts[i]] && !this.gVariables.functionCells[parts[i]]) {
         const { algorithm } = this.gVariables.holder[parts[i]];
         const { canCalc, result } = this.isCalculable(algorithm);
         if (canCalc) {
@@ -169,7 +172,10 @@ class AlgoFunctions {
     let stringHolder = "";
     for (var i = 0; i < algorithm.length; i++) {
       const isCellID = isBetween(algorithm.charCodeAt(i), [48, 65], [57, 90], true);
-      const isDot = algorithm[i] === "." || algorithm[i] === ",";
+      // const isDot = algorithm[i] === "." || algorithm[i] === ",";
+      if(algorithm[i] === ","){
+        algorithm[i] = '.';
+      }
       const isLast = i === algorithm.length - 1;
       if (isCellID) {
         stringHolder += algorithm[i];
@@ -177,10 +183,11 @@ class AlgoFunctions {
           parts.push(stringHolder);
         }
       } else {
-        if (isDot) {
-          stringHolder += ".";
-          continue;
-        }
+        // ERROR
+        // if (isDot) {
+        //   stringHolder += ".";
+        //   continue;
+        // }
         if (stringHolder !== "") {
           parts.push(stringHolder);
         }

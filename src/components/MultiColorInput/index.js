@@ -63,7 +63,10 @@ class MultiColorInput extends Component {
 
   handleKeyDown = (event) => {
     this.props.onKeyDown(event);
-    const { key, target } = event;
+    let { key, target } = event;
+    if(key === ','){
+      key = "."
+    }
     let newSelection = 0;
     // switch(key)
     specialKeysSet(this.specialKeys, key, true);
