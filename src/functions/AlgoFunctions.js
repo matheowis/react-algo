@@ -199,6 +199,8 @@ class AlgoFunctions {
     return parts;
   }
 
+
+
   partsToColorStructure = (parts) => {
     const structure = []
     let colorID = 1;
@@ -278,6 +280,66 @@ class AlgoFunctions {
       i++;
     }
     return newParts;
+  }
+  createFinalAlgorithmJSON = (finalName) => {
+
+    const parts = this.gVariables.functionCells[finalName]
+    const includedParts = Object.keys(this.filterFinalParts(parts));
+    const JsonAlgorithm = { [finalName]: parts, ['@final']: finalName };
+    console.log('Test');
+    console.log({ parts, includedParts });
+    for (var i = 0; i < includedParts.length; i++) {
+      JsonAlgorithm[includedParts[i]] = this.gVariables.functionCells[includedParts[i]];
+    }
+    return JsonAlgorithm;
+  }
+  // find included 
+  filterFinalParts = (outerParts, inloop, includedCells = {}) => {
+    const { functionCells } = this.gVariables;
+    const newParts = [];
+    const addIncludedCells = (name) => {
+      if (includedCells[name]) {
+        includedCells[name]++;
+      } else {
+        includedCells[name] = 1;
+      }
+    }
+    var i = 0;
+    while (i < outerParts.length) {
+      var part = outerParts[i];
+      if (functionCells[part]) {
+        addIncludedCells(part);
+        // Cell
+        newParts.push(...this.filterFinalParts(functionCells[part], true, includedCells));
+      } else if (this.funcs[part]) {
+        console.log("Funcs", part);
+        // Function
+        const funParts = this.funcs[part].count(outerParts, i);
+        funParts.forEach(funPart => {
+          if (functionCells[funPart]) {
+            addIncludedCells(funPart);
+            newParts.push('(', ...this.filterFinalParts(functionCells[funPart], true, includedCells), ')');
+          } else {
+            // FOperator
+            newParts.push(funPart)
+          }
+        });
+        i += this.funcs[part].skip;
+        continue;
+      } else if (part === "") {
+        //invalid
+        newParts.push("0");
+      } else {
+        // Operator
+        newParts.push(part);
+      }
+      i++;
+    }
+    if (inloop) {
+      return newParts;
+    } else {
+      return includedCells;
+    }
   }
 }
 

@@ -29,8 +29,9 @@ class Main extends Component {
     this.functionContainer.dispatchData(data);
   }
 
-  handleSetFinal = () => {
+  handleSetFinal = (AlgorithmObj) => {
 
+    console.log("Got Final Selection",AlgorithmObj)
   }
 
   render() {

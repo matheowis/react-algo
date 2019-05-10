@@ -104,8 +104,9 @@ class AlgoContainer extends Component {
     pEnd: ""
   }
 
+  finalCell = "";
   mainHolderKeys = [];
-  cellSelections = new CellSelections(15);
+  cellSelections = new CellSelections(30); // final selection ?
   algoFunctions = new AlgoFunctions(this.gVariables);
   Algo = { writing: false, currentItem: {}, selectedCell: null }
 
@@ -584,26 +585,41 @@ class AlgoContainer extends Component {
   // }
 
   handleSetFinal = () => {
+    const { name } = this.gVariables.holder.active.item;
+    this.finalCell = name;
+    this.cellSelections.FinalSelection(name);
 
+    const testJson = this.algoFunctions.createFinalAlgorithmJSON(name);
+    // const parts = this.gVariables.functionCells[this.finalCell]
+    // const testFlat = this.algoFunctions.flatAlgorithm(parts);
+
+    console.log({testJson})
+
+    this.props.onSetFinal();
   }
-  // thats a box2d
-  // handleDispatchSpace = (x, y) => {
-  //   // could get it from data
-  //   // data.length = y, data[0].length = x
-  //   const { name } = this.gVariables.holder.active.props.name;
-  //   const baseLocation = splitCellName(name);
-  //   const endName = CreateCellName(x + baseLocation.x, y + baseLocation.y);
-  //   this.pMouse.start = name;
-  //   this.pMouse.end = endName;
-  //   this.cellSelections.ChangeSelection(0, name, endName);
-  // }
+
+  handleFinishAlgorithm = () => {
+    if(this.finalCell === ""){
+      console.log("ERROR: Assign FinalCell")
+    }else{
+      const finalParts = this.gVariables.definedCells[this.finalCell]
+      for(var i =0;i< finalParts;i++){
+        const {typeName} = this.gVariables.definedCells[finalParts[i]]
+        if(typeName){
+          finalParts[i] = typeName
+        }else{
+          // need
+        }
+      }
+    }
+  }
 
   handleDispatchSpace = (data) => {
     const x = data.length;
     const y = data[0].length;
     // could get it from data
     // data.length = y, data[0].length = x
-    const { name } = this.gVariables.holder.active.props.name;
+    const { name } = this.gVariables.holder.active.props;
     const baseLocation = splitCellName(name);
     const endName = CreateCellName(x + baseLocation.x, y + baseLocation.y);
     this.pMouse.start = name;
@@ -670,7 +686,7 @@ class AlgoContainer extends Component {
           dispatchObject={this.toolsDispatch}
           // onOpen={this.props.handleToolsOpen} // need dispatch
           onAddData={this.props.onAddData}
-          onSetFinal={this.props.onSetFinal}
+          onSetFinal={this.handleSetFinal}
           onDispatchSpace={this.handleDispatchSpace}
           onDispatchData={this.handleDispatchData}
         />

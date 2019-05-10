@@ -1,5 +1,5 @@
 // export const OPERATORS = ['=', ';', '/', '*', '-', '+','(',':',')','?'];
-export const OPERATORS = ['=', ';', '/', '*', '-', '+','(',':','?'];
+export const OPERATORS = ['=', ';', '/', '*', '-', '+', '(', ':', '?'];
 
 export const COLORS_HEX = [
   "#43bc9d",
@@ -21,4 +21,8 @@ export const COLORS_HEX = [
 
 export const OPACITY_HEX = "44";
 
-export const CELL_SIZE = {X:100,Y:27};//yMin = 27
+export const FINAL_HEX = COLORS_HEX[2];
+
+export const FINAL_OPACITY_HEX = "22";
+
+export const CELL_SIZE = { X: 100, Y: 27 };//yMin = 27
