@@ -94,7 +94,7 @@ class AlgoContainer extends Component {
   };
 
   toolsDispatch = {
-    open:() => {}
+    open: () => { }
   };
 
   pMouse = {
@@ -182,8 +182,11 @@ class AlgoContainer extends Component {
         item.props.handleChange(algorithm);
       }
       // console.log("item", item)
+      const definedItem = this.gVariables.definedCells[item.name];
+      const headerName = definedItem ? definedItem.typeName : item.name;
+
       this.gVariables.holder.active.item = item.props;
-      this.gVariables.holder.active.setName(item.name);
+      this.gVariables.holder.active.setName(headerName);
       this.gVariables.holder.active.setAlgorithm(algorithm);
 
     }
@@ -291,8 +294,8 @@ class AlgoContainer extends Component {
     }
     // const startItem = this.gVariables.holder[this.pMouse.start] || this.gVariables.definedCells[this.pMouse.start].cellName;
     // const endItem = this.gVariables.holder[this.pMouse.end] || this.gVariables.definedCells[this.pMouse.end].cellName;
-    const startItem = this.gVariables.holder[this.pMouse.start] || this.pMouse.start;
-    const endItem = this.gVariables.holder[this.pMouse.end] || this.pMouse.end;
+    const startItem = this.gVariables.holder[this.pMouse.start] || this.gVariables.definedCells[this.pMouse.start];
+    const endItem = this.gVariables.holder[this.pMouse.end] || this.gVariables.definedCells[this.pMouse.end];
     const isHeader = document.activeElement === this.gVariables.holder.active.props.ref.current;
     const selection = isHeader ?
       mciFunctions.getSelection(this.gVariables.holder.active.props.ref.current).selectionStart :
@@ -315,6 +318,8 @@ class AlgoContainer extends Component {
     // console.log(this.gVariables.holder.active.props.algorithm);
     // console.log("parts=", parts);
 
+    const avaibleCells = { ...this.gVariables.holder, ...this.gVariables.definedCells }
+
     if (parts.length === 0) {
       console.log("TYPE_3A", parts[pIndex])
       return;
@@ -326,7 +331,7 @@ class AlgoContainer extends Component {
     if (OPERATORS.includes(parts[pIndex]) && parts[pIndex] !== ":") {
       // console.log("Type_O", parts[pIndex]);
       // console.log({ parts });
-      if (this.gVariables.holder[parts[pIndex + 1]]) {
+      if (avaibleCells[parts[pIndex + 1]]) {
         // console.log("TYPE_2A", parts[pIndex])
         parts.splice(pIndex + 1, 1, startItem.name);
         insertLength += startItem.name.length + 1;
@@ -353,7 +358,7 @@ class AlgoContainer extends Component {
         this.gVariables.holder.active.item.handleChange(parts.join(""), insertLength, true);
       }
       // this.Algo.currentItem.props.handleChange(parts.join(""), insertLength, true);
-    } else if (this.gVariables.holder[parts[pIndex]] || parts[pIndex] === ":") {
+    } else if (avaibleCells[parts[pIndex]] || parts[pIndex] === ":") {
       // new group
       // const { pStart, pEnd } = this.pMouse;
       // console.log("ched parts", { b: parts[pIndex - 1], c: parts[pIndex], f: parts[pIndex + 1] });
@@ -511,18 +516,30 @@ class AlgoContainer extends Component {
     // event.preventDefault()
     const { clientX, clientY } = event;
     if (event.button === 2) {
-      this.setState(() => ({
-        open: true,
-        left: clientX,
-        top: clientY
-      }))
-    } else if (this.state.open) {
-      this.setState(() => ({
-        open: false
-      }))
+      this.toolsDispatch.open(true, { left: clientX, top: clientY });
     } else {
+      this.toolsDispatch.open(false);
       this.handleMouseLeftUp(item);
     }
+
+
+    // if (event.button === 2) {
+    //   console.log("OPEN");
+    //   this.toolsDispatch.open({
+    //     // open: true,
+    //     left: clientX,
+    //     top: clientY
+    //   })
+    // } else if (this.toolsDispatch.state.open) {
+    //   console.log("CLOSE");
+    //   this.toolsDispatch.open({
+    //     open: false,
+    //     left: clientX,
+    //     top: clientY
+    //   })
+    // } else {
+    //   this.handleMouseLeftUp(item);
+    // }
   }
 
   handleChange = item => event => {
@@ -547,6 +564,7 @@ class AlgoContainer extends Component {
 
     const structure = this.algoFunctions.partsToColorStructure(parts);
     const selections = structure.filter(s => s.colorID !== "B");
+
     for (var i = 0; i < selections.length; i++) {
       const { start, end, colorID } = selections[i];
       this.cellSelections.ChangeSelection(colorID, start, end);
@@ -603,14 +621,14 @@ class AlgoContainer extends Component {
         const sX = x + baseLocation.x;
         const sY = y + baseLocation.y;
 
-        const cellName = CreateCellName(sX, sY);
+        const name = CreateCellName(sX, sY);
 
-        const origin = this.gVariables.holder[cellName];
+        const origin = this.gVariables.holder[name];
         // Object.assign(origin,{name});
-        const { name, value, parentName } = data[x][y];
+        const { typeName, value, parentName } = data[x][y];
 
-        this.gVariables.definedCells[cellName] = { origin, name,cellName, value, parentName };
-        delete this.gVariables.holder[cellName];
+        this.gVariables.definedCells[name] = { origin, name, typeName, algorithm: value, parentName, x: sX, y: sY };
+        delete this.gVariables.holder[name];
 
         origin.handleChangeSimple(value.toFixed(2));
 
@@ -621,7 +639,7 @@ class AlgoContainer extends Component {
     const exampleDataStructure = [
       [
         {
-          name: 'km',
+          typeName: 'km',
           value: 5.56,
           // parent: { km: 5.56, price: 5000 },
           parentName: "carrier"
@@ -649,7 +667,7 @@ class AlgoContainer extends Component {
           // top={top}
           // onAddData={this.handleAddData}
           // onSetFinal={this.handleSetFinal}
-          dispatchObject={this.Algo.toolsDispatch}
+          dispatchObject={this.toolsDispatch}
           // onOpen={this.props.handleToolsOpen} // need dispatch
           onAddData={this.props.onAddData}
           onSetFinal={this.props.onSetFinal}

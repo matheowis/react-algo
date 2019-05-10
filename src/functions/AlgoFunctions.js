@@ -127,8 +127,9 @@ class AlgoFunctions {
         const functionCells = this.funcs[parts[i]].spread(parts, i);
 
         functionCells.forEach(element => {
-          const { algorithm } = this.gVariables.holder[element];
-          const result = this.Generate(algorithm, this.gVariables.holder);
+          const { algorithm } = this.gVariables.holder[element] || this.gVariables.definedCells[element];
+          // const result = this.Generate(algorithm, this.gVariables.holder);
+          const result = this.Generate(algorithm, element);
           // filter out "" from functionCells at the end
           this.gVariables.functionCells[element] = result;
 
@@ -136,9 +137,9 @@ class AlgoFunctions {
         i += this.funcs[parts[i]].skip;
         continue;
       }
-      if (this.gVariables.holder[parts[i]]) {
+      if (this.gVariables.holder[parts[i]] || this.gVariables.definedCells[parts[i]]) {
         // if (this.gVariables.holder[parts[i]] && !this.gVariables.functionCells[parts[i]]) {
-        const { algorithm } = this.gVariables.holder[parts[i]];
+        const { algorithm } = this.gVariables.holder[parts[i]] || this.gVariables.definedCells[parts[i]];
         const { canCalc, result } = this.isCalculable(algorithm);
         if (canCalc) {
           this.gVariables.functionCells[parts[i]] = result;
@@ -173,7 +174,7 @@ class AlgoFunctions {
     for (var i = 0; i < algorithm.length; i++) {
       const isCellID = isBetween(algorithm.charCodeAt(i), [48, 65], [57, 90], true);
       // const isDot = algorithm[i] === "." || algorithm[i] === ",";
-      if(algorithm[i] === ","){
+      if (algorithm[i] === ",") {
         algorithm[i] = '.';
       }
       const isLast = i === algorithm.length - 1;
@@ -205,7 +206,7 @@ class AlgoFunctions {
     var i = 0;
     while (i < parts.length) {
       const last = structure[structure.length - 1]
-      if (this.gVariables.holder[parts[i]]) {
+      if (this.gVariables.holder[parts[i]] || this.gVariables.definedCells[parts[i]]) {
         structure.push({ text: [parts[i]], colorID, start: parts[i], end: parts[i] });
         colorID++;
       } else if (parts[i] === ":") {

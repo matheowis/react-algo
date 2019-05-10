@@ -25,16 +25,39 @@ const styles = {
 }
 
 class RightTools extends Component {
+  state = {
+    open: false,
+    left: 0,
+    top: 0
+  }
+
+  componentDidMount() {
+    this.props.dispatchObject.open = this.handleOpen;
+  }
+
+  handleOpen = (rightClick, params) => {
+    if (rightClick) {
+      this.setState(() => ({ ...params, open: true }));
+    } else if (this.state.open) {
+      this.setState(() => ({ open: false }));
+    }
+  }
+
+  handleAddData = event => {
+    this.props.onAddData(event);
+    this.setState(() => ({ open: false }));
+  }
+
+  handleSetFinal = event => {
+    this.props.onSetFinal(event);
+    this.setState(() => ({ open: false }));
+  }
   render() {
     const {
       classes,
-      open,
-      top,
-      left,
       localization,
-      onAddData,
-      onSetFinal
     } = this.props;
+    const { open, top, left } = this.state;
     const height = open ? 60 : 0;
     return (
       <div
@@ -42,17 +65,18 @@ class RightTools extends Component {
         style={{ height, top, left }}
         onContextMenu={e => { e.preventDefault() }}
       >
-        <div className={classes.button} onClick={onAddData}>{localization.addData}</div>
-        <div className={classes.button} onClick={onSetFinal}>{localization.setFinal}</div>
+        <div className={classes.button} onClick={this.handleAddData}>{localization.addData}</div>
+        <div className={classes.button} onClick={this.handleSetFinal}>{localization.setFinal}</div>
       </div>
     )
   }
 }
 
 RightTools.propTypes = {
-  open: PropTypes.bool.isRequired,
-  top: PropTypes.number.isRequired,
-  left: PropTypes.number.isRequired,
+  // open: PropTypes.bool.isRequired,
+  // top: PropTypes.number.isRequired,
+  // left: PropTypes.number.isRequired,
+  dispatchObject: PropTypes.object,
   localization: PropTypes.object,
   onAddData: PropTypes.func.isRequired,
   onSetFinal: PropTypes.func.isRequired

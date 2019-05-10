@@ -44,12 +44,12 @@ class AlgoCell extends Component {
     // color: "rgb(238,255,0)"
   }
   // myRef = React.createRef();
-  componentWillMount() {
+  // componentWillMount() {
     // check if this.handleInclude isn't depricated
     // this.props.item.props.handleInclude = this.handleInclude;
     // this.props.item.props.handleChange = this.handleChange;
     // this.props.item.props.ref = this.myRef;
-  }
+  // }
 
   // handleInclude = (color) => {
   //   console.log("do Stuff", this);
