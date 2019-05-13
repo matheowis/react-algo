@@ -1,7 +1,7 @@
 import { getCellsFromBox } from "../helpers";
-export const SUM_FUNC = function ( algoFunctions) {
+export const SUM_FUNC = function () {
   return {
-    algoFunctions,
+    // algoFunctions,
     count: sum,
     spread: sum_spread,
     skip: 6

@@ -1,7 +1,7 @@
 import { getCellsFromBox } from "../helpers";
-export const AVG_FUNC = function ( algoFunctions) {
+export const AVG_FUNC = function () {
   return {
-    algoFunctions,
+    // algoFunctions,
     count: avg,
     spread: avg_spread,
     skip: 6

@@ -4,7 +4,7 @@ import { isBetween, splitCellName } from "./helpers";
 class AlgoFunctions {
   constructor(gVariables) {
     this.gVariables = gVariables;
-    this.funcs = ALGO_FUNCTIONS(this);
+    this.funcs = ALGO_FUNCTIONS;
   }
   /**
    * object example {"SUMA": {}, }
@@ -94,10 +94,67 @@ class AlgoFunctions {
 
     console.log("CalculateLocal Parts=", parts);
     console.log("gVariables", this.gVariables);
-    const flatted = this.flatAlgorithm(parts);
+    const { functionCells } = this.gVariables;
+
+    const flatted = this.flatAlgorithm(functionCells,parts);
     const flatAlgo = flatted.join("");
     console.log({ flatted })
     return eval(flatAlgo).toFixed(2);
+  }
+
+  calculateFromJson = (holder, json) => {
+    const final = json['@final'];
+    delete json['@final'];
+    const cells = Object.keys(json).reduce((prev, curr) => {
+      const cell = json[curr];
+      if (cell.parentName) {
+        prev[curr] = [holder[cell.parentName][cell.name]].map(v => v.trim());
+      } else {
+        prev[curr] = cell.algorithm.map(v => v.trim());
+      }
+      return prev
+    }, {});
+    console.log('cells',cells);
+    const flatted = this.flatAlgorithm(cells, cells[final]);
+    console.log("JSON flatted", flatted);
+    return eval(flatted.join(''));
+
+  }
+
+  flatAlgorithm = (cells, final) => {
+    // const { functionCells } = this.gVariables;
+    // const cells = cells
+    const newParts = [];
+    var i = 0;
+    while (i < final.length) {
+      var part = final[i];
+      if (cells[part]) {
+        // Cell
+        newParts.push(...this.flatAlgorithm(cells, cells[part]));
+      } else if (this.funcs[part]) {
+        // Function
+        // console.log({funcs:ALGO_FUNCTIONS});
+        const funParts = this.funcs[part].count(final, i);
+        funParts.forEach(funPart => {
+          if (cells[funPart]) {
+            newParts.push('(', ...this.flatAlgorithm(cells, cells[funPart]), ')');
+          } else {
+            // FOperator
+            newParts.push(funPart)
+          }
+        });
+        i += this.funcs[part].skip;
+        continue;
+      } else if (part === "") {
+        //invalid
+        newParts.push("0");
+      } else {
+        // Operator
+        newParts.push(part);
+      }
+      i++;
+    }
+    return newParts;
   }
   // 2?
   Calculate = () => {
@@ -247,52 +304,66 @@ class AlgoFunctions {
     return newParts;
   }
 
-  flatAlgorithm = (outerParts = []) => {
-    const { functionCells } = this.gVariables;
-    const newParts = [];
-    var i = 0;
-    while (i < outerParts.length) {
-      var part = outerParts[i];
-      if (functionCells[part]) {
-        // Cell
-        newParts.push(...this.flatAlgorithm(functionCells[part]));
-      } else if (this.funcs[part]) {
-        // Function
-        // console.log({funcs:this.funcs});
-        const funParts = this.funcs[part].count(outerParts, i);
-        funParts.forEach(funPart => {
-          if (functionCells[funPart]) {
-            newParts.push('(', ...this.flatAlgorithm(functionCells[funPart]), ')');
-          } else {
-            // FOperator
-            newParts.push(funPart)
-          }
-        });
-        i += this.funcs[part].skip;
-        continue;
-      } else if (part === "") {
-        //invalid
-        newParts.push("0");
-      } else {
-        // Operator
-        newParts.push(part);
-      }
-      i++;
-    }
-    return newParts;
-  }
+  // flatAlgorithm = (outerParts = []) => {
+  //   const { functionCells } = this.gVariables;
+  //   const newParts = [];
+  //   var i = 0;
+  //   while (i < outerParts.length) {
+  //     var part = outerParts[i];
+  //     if (functionCells[part]) {
+  //       // Cell
+  //       newParts.push(...this.flatAlgorithm(functionCells[part]));
+  //     } else if (this.funcs[part]) {
+  //       // Function
+  //       // console.log({funcs:this.funcs});
+  //       const funParts = this.funcs[part].count(outerParts, i);
+  //       funParts.forEach(funPart => {
+  //         if (functionCells[funPart]) {
+  //           newParts.push('(', ...this.flatAlgorithm(functionCells[funPart]), ')');
+  //         } else {
+  //           // FOperator
+  //           newParts.push(funPart)
+  //         }
+  //       });
+  //       i += this.funcs[part].skip;
+  //       continue;
+  //     } else if (part === "") {
+  //       //invalid
+  //       newParts.push("0");
+  //     } else {
+  //       // Operator
+  //       newParts.push(part);
+  //     }
+  //     i++;
+  //   }
+  //   return newParts;
+  // }
+
   createFinalAlgorithmJSON = (finalName) => {
 
     const parts = this.gVariables.functionCells[finalName]
     const includedParts = Object.keys(this.filterFinalParts(parts));
-    const JsonAlgorithm = { [finalName]: parts, ['@final']: finalName };
+    // const JsonAlgorithm = { [finalName]: parts, ['@final']: finalName };
+    const JsonAlgorithm = {
+      ['@final']: finalName,
+      [finalName]: { algorithm: parts }
+    };
     console.log('Test');
     console.log({ parts, includedParts });
     for (var i = 0; i < includedParts.length; i++) {
-      JsonAlgorithm[includedParts[i]] = this.gVariables.functionCells[includedParts[i]];
+      const definedCell = this.gVariables.definedCells[includedParts[i]]
+      if (definedCell) {
+        // JsonAlgorithm[includedParts[i]] = `${definedCell.parentName}.${definedCell.typeName}[${definedCell.index}]`
+        JsonAlgorithm[includedParts[i]] = { parentName: definedCell.parentName, name: definedCell.typeName }
+      } else {
+        // JsonAlgorithm[includedParts[i]] = this.gVariables.functionCells[includedParts[i]];
+        JsonAlgorithm[includedParts[i]] = { algorithm: this.gVariables.functionCells[includedParts[i]] };
+      }
     }
     return JsonAlgorithm;
   }
+
+
   // find included 
   filterFinalParts = (outerParts, inloop, includedCells = {}) => {
     const { functionCells } = this.gVariables;
