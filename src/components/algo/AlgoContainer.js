@@ -594,67 +594,8 @@ class AlgoContainer extends Component {
     this.finalCell = name;
     this.cellSelections.FinalSelection(name);
 
-    const testJson = this.algoFunctions.createFinalAlgorithmJSON(name);
-    // const parts = this.gVariables.functionCells[this.finalCell]
-    // const testFlat = this.algoFunctions.flatAlgorithm(parts);
-
-    console.log({ testJson })
-
-    const carrier = {
-      emptyA: ["2.70 ", "2.70 ", "2.70 ", "2.70 ", "2.70 ", "2.70 ", "2.70 ", "2.70 ", "2.70 ", "2.70 "],
-      emptyB: ["0.00 ", "0.00 ", "0.00 ", "0.00 ", "0.00 ", "0.00 ", "0.00 ", "0.00 ", "0.00 ", "0.00 "],
-      filledA: ["3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 "],
-      filledB: ["3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 ", "3.20 "],
-      isImpuls: false,
-      name: "ANESS",
-      type: "Wszystko",
-      unloadingA: ["50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 "],
-      unloadingB: ["50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 ", "50.00 "],
-    };
-    const route = {
-      carrier: "MORTRANS -7m",
-      code: "32",
-      cost: "",
-      createdAt: "2019-05-02 10:07",
-      currency: "",
-      date: "2019-05-07 00:00",
-      distance: 225,
-      distanceReal: "",
-      driver: "508-105-950",
-      filledDist: 113,
-      filledDistImpuls: 0,
-      id: "S/005717/2019",
-      idFirmy: 1,
-      idTrasy: 24900,
-      kodkierowcy: "",
-      lastTarget: "Jerzmanowice",
-      nrFaktury: "",
-      odlWgPrzewoznikaPowrot: 111,
-      stojak: true,
-      time: "",
-      unloadings: 3,
-      unloadingsReal: "",
-      uuid: "80efc00e-a08c-49b7-a74c-d62feb16fdba",
-      uwagi: "",
-    }
-
-    const fCode = parseFloat(route.code[0]);
-    const index = fCode === "0" ? 9 : fCode - 1;
-
-    const lHolder = {
-      carrier: {
-        emptyA:carrier.emptyA[index],
-        emptyB:carrier.emptyB[index],
-        filledA:carrier.filledA[index],
-        filledB:carrier.filledB[index],
-        unloadingA:carrier.unloadingA[index],
-        unloadingB:carrier.unloadingB[index],
-      }
-    }
-
-    const decodedValue = this.algoFunctions.calculateFromJson(lHolder, testJson)
-    console.log({decodedValue});
-    this.props.onSetFinal();
+    const encodedAlgorithm = this.algoFunctions.createFinalAlgorithmJSON(name);
+    this.props.onSetFinal(encodedAlgorithm);
   }
 
   handleFinishAlgorithm = () => {

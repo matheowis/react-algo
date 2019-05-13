@@ -108,9 +108,9 @@ class AlgoFunctions {
     const cells = Object.keys(json).reduce((prev, curr) => {
       const cell = json[curr];
       if (cell.parentName) {
-        prev[curr] = [holder[cell.parentName][cell.name]].map(v => v.trim());
+        prev[curr] = [holder[cell.parentName][cell.name]];
       } else {
-        prev[curr] = cell.algorithm.map(v => v.trim());
+        prev[curr] = cell.algorithm;
       }
       return prev
     }, {});
