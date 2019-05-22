@@ -142,6 +142,9 @@ class MultiColorInput extends Component {
 
   handleChangeSimple = (value,prevAlgorithm) => {
     const target = this.myRef.current;
+    if(!target){
+      return;
+    }
     const structure = this.props.createSegments(value);
     // if(prevAlgorithm){
     // }

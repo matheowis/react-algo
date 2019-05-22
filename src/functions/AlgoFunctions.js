@@ -58,7 +58,7 @@ class AlgoFunctions {
             const outcome = this.CalculateLocal({ props: parent });
             parent.outcome = outcome;
             this.recalculationStack[parent.name] = outcome;
-            console.log("RecalculateParents, outcome=", outcome);
+            console.log("RecalculateParents, parent=", parent);
             parent.handleChange(outcome, undefined, false, true);
             this.RecalculateParents({ props: parent });
           }
@@ -96,7 +96,7 @@ class AlgoFunctions {
     console.log("gVariables", this.gVariables);
     const { functionCells } = this.gVariables;
 
-    const flatted = this.flatAlgorithm(functionCells,parts);
+    const flatted = this.flatAlgorithm(functionCells, parts);
     const flatAlgo = flatted.join("");
     console.log({ flatted })
     return eval(flatAlgo).toFixed(2);
@@ -114,7 +114,7 @@ class AlgoFunctions {
       }
       return prev
     }, {});
-    console.log('cells',cells);
+    console.log('cells', cells);
     const flatted = this.flatAlgorithm(cells, cells[final]);
     console.log("JSON flatted", flatted);
     return eval(flatted.join(''));
@@ -339,30 +339,63 @@ class AlgoFunctions {
   //   return newParts;
   // }
 
-  createFinalAlgorithmJSON = (finalName) => {
+  encodeAlgorithm = (finalName, isDynamic) => {
 
     const parts = this.gVariables.functionCells[finalName]
     const includedParts = Object.keys(this.filterFinalParts(parts));
     // const JsonAlgorithm = { [finalName]: parts, ['@final']: finalName };
     const JsonAlgorithm = {
       ['@final']: finalName,
-      [finalName]: { algorithm: parts }
+      [finalName]: parts
+      // [finalName]: { algorithm: parts }
     };
-    console.log('Test');
-    console.log({ parts, includedParts });
+    // console.log('Test');
+    // console.log({ parts, includedParts });
     for (var i = 0; i < includedParts.length; i++) {
       const definedCell = this.gVariables.definedCells[includedParts[i]]
       if (definedCell) {
-        // JsonAlgorithm[includedParts[i]] = `${definedCell.parentName}.${definedCell.typeName}[${definedCell.index}]`
-        JsonAlgorithm[includedParts[i]] = { parentName: definedCell.parentName, name: definedCell.typeName }
+        if (isDynamic) {
+          JsonAlgorithm[includedParts[i]] = { parentName: definedCell.parentName, name: definedCell.typeName }
+        }
       } else {
-        // JsonAlgorithm[includedParts[i]] = this.gVariables.functionCells[includedParts[i]];
-        JsonAlgorithm[includedParts[i]] = { algorithm: this.gVariables.functionCells[includedParts[i]] };
+        // JsonAlgorithm[includedParts[i]] = { algorithm: this.gVariables.functionCells[includedParts[i]] };
+        JsonAlgorithm[includedParts[i]] = this.gVariables.functionCells[includedParts[i]];
       }
     }
     return JsonAlgorithm;
   }
 
+  encodeEditAlgorithm = (isDynamic) => {
+    const editAlgorithm = {
+      definedCells: [],
+      holder: [],
+    }
+    const { definedCells, functionCells, holder } = this.gVariables;
+    const functionKeys = Object.keys(functionCells).filter(key => !definedCells[key]);
+    const definedKeys = Object.keys(definedCells);
+    const holderKeys = Object.keys(holder)
+    // for (var i = 0; i < functionKeys.length; i++) {
+    //   const key = functionKeys[i];
+    //   editAlgorithm.holder.push({ name: key, algorithm: functionCells[key].join('') });
+    // }
+    for (var i = 0; i < holderKeys.length; i++) {
+      const key = holderKeys[i];
+      // if (!functionKeys[key] && holder[key].algorithm.trim() !== "") {
+      if (holder[key].algorithm.trim() !== "") {
+        editAlgorithm.holder.push({ name: key, algorithm: holder[key].algorithm });
+      }
+    }
+    if (!isDynamic) {
+      return editAlgorithm;
+    }
+
+    for (var i = 0; i < definedKeys.length; i++) {
+      const key = definedKeys[i];
+      editAlgorithm.definedCells.push({ name: key, algorithm: definedCells[key].algorithm });
+    }
+
+    return editAlgorithm;
+  }
 
   // find included 
   filterFinalParts = (outerParts, inloop, includedCells = {}) => {

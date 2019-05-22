@@ -1,24 +1,25 @@
 import {ALGO_FUNCTIONS} from './constant';
 
-
+export default calculateFromJson
 
 function  calculateFromJson (holder,json) {
-    const final = json['@final'];
+    const final = json[json['@final']];
     delete json['@final'];
     const cells = Object.keys(json).reduce((prev,curr) => {
       const cell = json[curr];
       if(cell.parentName){
-        prev[curr] = [holder[cell.parentName][cell.name]];
+        prev[curr] = [holder[cell.parentName][cell.typeName]];
       }else{
-        prev[curr] = cell.algorithm;
+        // prev[curr] = cell.algorithm;
+        prev[curr] = cell;
       }
       return prev
     }, {});
-    console.log(cells);
+    // console.log('cells',cells);
+    // console.log('final',final);
     const flatted = flatAlgorithmJson(cells,final);
-    console.log("JSON flatted", flatted);
-    return eval(flatted);
-    
+    // console.log("JSON flatted", flatted);
+    return eval(flatted.join(''));
   }
 
  function flatAlgorithmJson (cells,final) {
@@ -30,14 +31,14 @@ function  calculateFromJson (holder,json) {
       var part = final[i];
       if (cells[part]) {
         // Cell
-        newParts.push(...this.flatAlgorithmJson(cells,cells[part]));
+        newParts.push(...flatAlgorithmJson(cells,cells[part]));
       } else if (ALGO_FUNCTIONS[part]) {
         // Function
         // console.log({funcs:ALGO_FUNCTIONS});
         const funParts = ALGO_FUNCTIONS[part].count(final, i);
         funParts.forEach(funPart => {
           if (cells[funPart]) {
-            newParts.push('(', ...this.flatAlgorithmJson(cells,cells[funPart]), ')');
+            newParts.push('(', ...flatAlgorithmJson(cells,cells[funPart]), ')');
           } else {
             // FOperator
             newParts.push(funPart)

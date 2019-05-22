@@ -16,7 +16,7 @@ import { mciFunctions } from '../MultiColorInput/helpers';
 const styles = {
   root: {
     width: "100%",
-    height: "80%",
+    height: "90%",
   },
   copyHolder: {
     position: "fixed",
@@ -133,7 +133,19 @@ class AlgoContainer extends Component {
     this.cellSelections.ChangeSelection(0, newName);
 
     this.props.functionContainer.dispatchData = this.handleDispatchData;
+    this.props.functionContainer.dispatchDataArray = this.handleDispatchDataArray;
     this.props.functionContainer.dispatchSpace = this.handleDispatchSpace;
+    this.props.functionContainer.dispatchEditData = this.handleDispatchEditData;
+    this.props.functionContainer.dispatchClearSheet = this.handleClearSheet;
+    const dataArray = this.props.onMountDataDispatch();
+
+    for (var i = 0; i < dataArray.length; i++) {
+      const { data, cell } = dataArray[i];
+      this.handleDispatchData(data, cell)
+    }
+
+    const editDataArray = this.props.onMountEditDataDispatch();
+    this.handleDispatchEditData(editDataArray);
   }
 
   handleBlur = item => event => {
@@ -232,7 +244,7 @@ class AlgoContainer extends Component {
         this.cellSelections.clearSelection();
         break;
       case "Delete": {
-        this.handleDelete();
+        this.handleDelete(this.cellSelections.GetSelection(0));
         this.cellSelections.clearSelection(true);
       }
     }
@@ -497,8 +509,9 @@ class AlgoContainer extends Component {
 
   }
 
-  handleDelete = () => {
-    const { start, end } = this.cellSelections.GetSelection(0);
+  handleDelete = ({ start, end }) => {
+    // const { start, end } = this.cellSelections.GetSelection(0);
+    console.log("{start,end}=", { start, end });
     const cellBox = getCellsFromBox(start, end);
     for (var i = 0; i < cellBox.length; i++) {
       const definedCell = this.gVariables.definedCells[cellBox[i]];
@@ -582,20 +595,17 @@ class AlgoContainer extends Component {
     return structure;
   }
 
-  // handleAddData = () => {
-  //   // const {AvaibleData} = this.props;
-
-
-
-  // }
-
   handleSetFinal = () => {
+    const { dynamic } = this.props;
     const { name } = this.gVariables.holder.active.item;
     this.finalCell = name;
     this.cellSelections.FinalSelection(name);
 
-    const encodedAlgorithm = this.algoFunctions.createFinalAlgorithmJSON(name);
-    this.props.onSetFinal(encodedAlgorithm);
+    const encodedAlgorithm = this.algoFunctions.encodeAlgorithm(name, dynamic);
+    const encodedEditAlgorithm = this.algoFunctions.encodeEditAlgorithm(dynamic);
+
+    this.props.onSetFinal({ encodedAlgorithm, encodedEditAlgorithm });
+
   }
 
   handleFinishAlgorithm = () => {
@@ -614,21 +624,58 @@ class AlgoContainer extends Component {
     }
   }
 
-  handleDispatchSpace = (data) => {
-    const x = data.length;
-    const y = data[0].length;
-    // could get it from data
-    // data.length = y, data[0].length = x
-    const { name } = this.gVariables.holder.active.props;
-    const baseLocation = splitCellName(name);
-    const endName = CreateCellName(x + baseLocation.x, y + baseLocation.y);
-    this.pMouse.start = name;
-    this.pMouse.end = endName;
-    this.cellSelections.ChangeSelection(0, name, endName);
+  // handleDispatchSpace = (data) => {
+  //   const x = data.length;
+  //   const y = data[0].length;
+  //   // could get it from data
+  //   // data.length = y, data[0].length = x
+  //   const { name } = this.gVariables.holder.active.props;
+  //   const baseLocation = splitCellName(name);
+  //   const endName = CreateCellName(x + baseLocation.x, y + baseLocation.y);
+  //   this.pMouse.start = name;
+  //   this.pMouse.end = endName;
+  //   this.cellSelections.ChangeSelection(0, name, endName);
+  // }
+
+  // handleSetSingleDefined = ( name,item) => {
+  //   const origin = this.gVariables.holder[name];
+
+  // }
+
+  handleClearSheet = () => {
+    const { rows, columns } = this.props
+    console.log('CLEAR_SHEET',{ start: rows, end: columns })
+    this.handleDelete({ start: CreateCellName(0, 1), end: CreateCellName(columns - 1, rows) });
+    this.cellSelections.clearSelection(true);
   }
 
-  handleDispatchData = (data) => {
-    const cName = this.gVariables.holder.active.item.name;
+  handleDispatchEditData = (editDataArray, clear) => {
+    console.log("handleDispatchEditData=", editDataArray)
+    // clear
+    for (var i = 0; i < editDataArray.length; i++) {
+      const edit = editDataArray[i];
+      const item = this.gVariables.holder[edit.name]
+      item.handleChangeSimple(edit.algorithm);
+      this.calculateCell({ props: item });
+    }
+  }
+
+  handleDispatchDataArray = (dataArray, clear) => {
+    console.log('handleDispatchDataArray - to be cleared')
+    if (clear) {
+      this.handleClearSheet();
+    }
+    console.log('handleDispatchDataArray - cleared')
+    for (var i = 0; i < dataArray.length; i++) {
+      const { data, cell } = dataArray[i];
+      console.log('handleDispatchDataArray inLoop', { data, cell });
+
+      this.handleDispatchData(data, cell)
+    }
+  }
+
+  handleDispatchData = (data, cell) => {
+    const cName = cell || this.gVariables.holder.active.item.name;
     const baseLocation = splitCellName(cName);
 
     console.log(data);
@@ -669,23 +716,26 @@ class AlgoContainer extends Component {
 
   }
 
+  // handleClearSheet = () =>{
+  //   const editedCells = {
+  //     definedCells:[],
+  //     commonCells:[]
+  //   };
+  //   const definedKeys = Object.keys(this.gVariables.definedCells);
+  //   for(var i = 0;)
+  //   // origin.handleChangeSimple(value);
+
+  //   // return changes for edit
+  // }
+
   render() {
     const { classes } = this.props;
-    // const { open, top, left } = this.state;
-    // ten komponent nie powinien sie rerenderowac
     return (
       <div className={classes.root}>
 
         <textarea ref={this.textareaRef} className={classes.copyHolder} />
-        {/* open rerenderuje wszystko!!!// powinien się sam w sobie otwierać */}
         <RightTools
-          // open={open}
-          // left={left}
-          // top={top}
-          // onAddData={this.handleAddData}
-          // onSetFinal={this.handleSetFinal}
           dispatchObject={this.toolsDispatch}
-          // onOpen={this.props.handleToolsOpen} // need dispatch
           onAddData={this.props.onAddData}
           onSetFinal={this.handleSetFinal}
           onDispatchSpace={this.handleDispatchSpace}
@@ -751,6 +801,8 @@ AlgoContainer.propTypes = {
   functionContainer: PropTypes.object,
   onAddData: PropTypes.func,
   onSetFinal: PropTypes.func,
+  onMountDataDispatch: PropTypes.func,
+  dynamic: PropTypes.bool,
 }
 
 AlgoContainer.defaultProps = {
@@ -762,7 +814,12 @@ AlgoContainer.defaultProps = {
    * Static
    */
   columns: 6,
-  functionContainer: {}
+  /**
+ * Static
+ */
+  functionContainer: {},
+  dynamic: false,
+
 }
 
 export default injectSheet(styles)(AlgoContainer);
