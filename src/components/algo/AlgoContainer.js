@@ -17,23 +17,31 @@ const styles = {
   root: {
     width: "100%",
     height: "90%",
+    boxSizing:'content-box',
+    lineHeight:1
   },
   copyHolder: {
     position: "fixed",
     top: -500,
-    left: -500
+    left: -500,
+    boxSizing:'content-box',
+    lineHeight:1
   },
   mainTable: {
     width: "100%",
     height: "100%",
     overflow: "auto",
-    position: "relative"
+    position: "relative",
+    boxSizing:'content-box',
+    lineHeight:1
   },
   letterHeader: {
     display: "flex",
     position: "sticky",
     top: 0,
-    zIndex: 1000
+    zIndex: 1000,
+    boxSizing:'content-box',
+    lineHeight:1
   },
   topHeader: {
     minWidth: CELL_SIZE.X - 1,
@@ -44,7 +52,9 @@ const styles = {
     padding: "1px 0px",
     background: "#eee",
     borderColor: "#aaa",
-    textAlign: "center"
+    textAlign: "center",
+    boxSizing:'content-box',
+    lineHeight:1
   },
   side: {
     minWidth: 24,
@@ -58,9 +68,13 @@ const styles = {
     textAlign: "center",
     borderRight: "none",
     borderBottom: "none",
+    boxSizing:'content-box',
+    lineHeight:1,
   },
   flex: {
-    display: "flex"
+    display: "flex",
+    boxSizing:'content-box',
+    lineHeight:1
   },
   sideHeader: {
     minWidth: 24,
@@ -76,7 +90,9 @@ const styles = {
     borderBottom: "none",
     position: "sticky",
     left: 0,
-    zIndex: 999
+    zIndex: 999,
+    boxSizing:'content-box',
+    lineHeight:1
   }
 }
 
@@ -137,14 +153,14 @@ class AlgoContainer extends Component {
     this.props.functionContainer.dispatchSpace = this.handleDispatchSpace;
     this.props.functionContainer.dispatchEditData = this.handleDispatchEditData;
     this.props.functionContainer.dispatchClearSheet = this.handleClearSheet;
-    const dataArray = this.props.onMountDataDispatch();
+    const dataArray = this.props.onMountDataDispatch() || [];
 
     for (var i = 0; i < dataArray.length; i++) {
       const { data, cell } = dataArray[i];
       this.handleDispatchData(data, cell)
     }
 
-    const editDataArray = this.props.onMountEditDataDispatch();
+    const editDataArray = this.props.onMountEditDataDispatch() || [];
     this.handleDispatchEditData(editDataArray);
   }
 
@@ -644,7 +660,7 @@ class AlgoContainer extends Component {
 
   handleClearSheet = () => {
     const { rows, columns } = this.props
-    console.log('CLEAR_SHEET',{ start: rows, end: columns })
+    console.log('CLEAR_SHEET', { start: rows, end: columns })
     this.handleDelete({ start: CreateCellName(0, 1), end: CreateCellName(columns - 1, rows) });
     this.cellSelections.clearSelection(true);
   }
@@ -802,6 +818,7 @@ AlgoContainer.propTypes = {
   onAddData: PropTypes.func,
   onSetFinal: PropTypes.func,
   onMountDataDispatch: PropTypes.func,
+  onMountEditDataDispatch: PropTypes.func,
   dynamic: PropTypes.bool,
 }
 
@@ -819,7 +836,10 @@ AlgoContainer.defaultProps = {
  */
   functionContainer: {},
   dynamic: false,
-
+  onMountDataDispatch: () => {return null},
+  onMountEditDataDispatch:() => {return null},
+  onAddData: () => { },
+  onSetFinal: () => { },
 }
 
 export default injectSheet(styles)(AlgoContainer);

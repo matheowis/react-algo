@@ -9,7 +9,9 @@ const styles = {
     pointerEvents: "none",
     position: "absolute",
     border: "solid",
-    transition: "width 0.15s, height 0.15s, left 0.15s, top 0.15s"
+    transition: "width 0.15s, height 0.15s, left 0.15s, top 0.15s",
+    boxSizing:'content-box',
+    lineHeight:1
   }
 }
 
@@ -39,7 +41,7 @@ class Selection extends Component {
     const { X, Y } = CELL_SIZE;
     return valid ? {
       left: Math.min(startSplit.x, endSplit.x) * X + 33,
-      top: (Math.min(startSplit.y, endSplit.y) - 1) * Y + 21,
+      top: (Math.min(startSplit.y, endSplit.y) - 1) * Y + 19,
       width: (Math.abs(startSplit.x - endSplit.x) + 1) * X - 4,
       height: (Math.abs(startSplit.y - endSplit.y) + 1) * Y - 4
     } : {

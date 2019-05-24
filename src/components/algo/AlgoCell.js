@@ -5,6 +5,11 @@ import MultiColorInput from "../MultiColorInput";
 import {CELL_SIZE} from "../../constant";
 
 const styles = {
+  container:{
+    boxSizing:'content-box',
+    lineHeight:1,
+    position: "relative" 
+  },
   bar: {
     width:100,
     width:CELL_SIZE.X - 1,//wBorder = 1
@@ -19,11 +24,14 @@ const styles = {
     "&:disabled": {
       backgroundColor: "white"
     },
+    boxSizing:'content-box',
+    lineHeight:1
     // "&:focus":{
     //   width:100,
     //   zIndex:2,
     //   position:"absolute"
     // },
+
   },
   graber: {
     width: 4,
@@ -63,7 +71,7 @@ class AlgoCell extends Component {
     const { classes, item } = this.props;
     const { value } = this.state;
     return (
-      <div style={{ position: "relative" }}>
+      <div className={classes.container}>
       <MultiColorInput 
         id={`cell-${item.name}`}
         className={classes.bar}
